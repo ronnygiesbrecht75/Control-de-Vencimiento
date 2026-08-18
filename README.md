@@ -58,6 +58,23 @@ Esto generará en la carpeta `release/`:
 
 ---
 
+## 🔄 Actualizaciones Automáticas (Auto-Updater con GitHub)
+
+La aplicación viene configurada con **`electron-updater`**. Cuando los usuarios abren la aplicación en Windows, esta consulta a GitHub si hay una versión más reciente y la descarga automáticamente en segundo plano.
+
+### ¿Cómo lanzar una actualización para tus usuarios?
+1. Incrementa el número de versión en `package.json` (por ejemplo, de `"version": "1.0.0"` a `"version": "1.0.1"`).
+2. Si tienes tu token de GitHub configurado (`GH_TOKEN`), ejecuta:
+   ```bash
+   npm run electron:publish
+   ```
+   *(O sube el instalador `.exe` compilado y el archivo `latest.yml` generado a la sección **Releases** de tu repositorio en GitHub).*
+3. Cuando tus usuarios o tú abran la aplicación instalada en su PC, verán automáticamente un aviso:
+   > *"Se ha descargado la versión 1.0.1 de la aplicación. ¿Deseas reiniciar para instalar la actualización?"*
+4. Al hacer clic en **"Reiniciar y Actualizar"**, la aplicación se actualiza sola sin perder los datos guardados.
+
+---
+
 ## 📦 Construir para Servidor Web (Build)
 
 Si deseas generar los archivos optimizados listos para desplegar en cualquier servidor web:

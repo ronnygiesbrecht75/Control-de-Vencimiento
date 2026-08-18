@@ -12,11 +12,19 @@
     "lint": "tsc --noEmit",
     "electron:dev": "concurrently -k \"vite --port=3000\" \"wait-on tcp:3000 && electron .\"",
     "electron:build": "vite build && electron-builder",
-    "electron:pack": "vite build && electron-builder --dir"
+    "electron:pack": "vite build && electron-builder --dir",
+    "electron:publish": "vite build && electron-builder --publish always"
   },
   "build": {
     "appId": "com.controlfacturas.app",
     "productName": "Control de Facturas y Vencimiento",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "ronnygiesbrecht",
+        "repo": "control-facturas-vencimiento"
+      }
+    ],
     "directories": {
       "output": "release"
     },
@@ -43,6 +51,7 @@
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
     "dotenv": "^17.2.3",
+    "electron-updater": "^6.8.9",
     "express": "^4.21.2",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
