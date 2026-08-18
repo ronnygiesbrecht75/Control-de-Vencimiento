@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Sun, 
   Moon, 
@@ -9,7 +9,8 @@ import {
   Database, 
   Download, 
   Upload, 
-  ShieldCheck
+  ShieldCheck,
+  X
 } from 'lucide-react';
 import { ThemeMode, InvoiceItem, CatalogProduct } from '../types';
 
@@ -37,7 +38,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     latestVersion?: string;
   }>({ status: null });
 
-  const currentAppVersion = '1.2.2';
+  const currentAppVersion = '1.2.3';
 
   // Listen to Electron Auto-Updater IPC events if available
   useEffect(() => {
