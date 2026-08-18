@@ -313,58 +313,55 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
     }, 100);
   };
 
-  // Preview computed invoice number
-  const fullInvoiceNumber = formatInvoiceNumber(sucursal, caja, secuencia);
-
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-4">
       {/* Form Card */}
-      <div className="bg-white p-5 sm:p-7 rounded-2xl border border-gray-200 shadow-sm">
+      <div className="bg-white dark:bg-[#282a2c] p-4 sm:p-5 rounded-2xl border border-gray-200 dark:border-[#3c4043] shadow-xs transition-colors">
         
         {/* Header Title */}
-        <div className="border-b border-gray-200 pb-4 mb-5">
-          <h2 className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
-            <span className="bg-emerald-100 text-[#107c41] p-1.5 rounded-lg">
-              <PlusCircle className="w-5 h-5" />
+        <div className="border-b border-gray-200 dark:border-[#3c4043] pb-3 mb-4">
+          <h2 className="text-sm sm:text-[15px] font-bold text-gray-900 dark:text-[#f1f3f4] flex items-center gap-1.5">
+            <span className="bg-emerald-100 dark:bg-emerald-950/80 text-[#107c41] dark:text-emerald-400 p-1 rounded-md">
+              <PlusCircle className="w-4 h-4" />
             </span>
             Formulario de Carga de Factura
           </h2>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <p className="text-[11px] text-gray-500 dark:text-[#9aa0a6] mt-0.5">
             Ingrese el número de factura, seleccione o escriba los productos y verifique las fechas.
           </p>
         </div>
 
         {/* Success Alert Banner */}
         {successInfo?.visible && (
-          <div className="mb-5 bg-emerald-50 border border-emerald-400 text-emerald-900 px-4 py-3 rounded-xl flex items-center justify-between shadow-xs animate-in fade-in slide-in-from-top duration-200">
-            <div className="flex items-center gap-2.5 text-sm font-semibold">
-              <CheckCircle2 className="w-5 h-5 text-[#107c41] shrink-0" />
+          <div className="mb-4 bg-emerald-50 dark:bg-[#143320] border border-emerald-400 dark:border-emerald-600 text-emerald-900 dark:text-emerald-200 px-3 py-2 rounded-xl flex items-center justify-between shadow-xs animate-in fade-in slide-in-from-top duration-200">
+            <div className="flex items-center gap-2 text-xs font-semibold">
+              <CheckCircle2 className="w-4 h-4 text-[#107c41] dark:text-emerald-400 shrink-0" />
               <span>{successInfo.message}</span>
             </div>
             <button
               type="button"
               onClick={() => setSuccessInfo(null)}
-              className="text-emerald-700 hover:text-emerald-900 p-1 rounded-md hover:bg-emerald-100/50"
+              className="text-emerald-700 dark:text-emerald-300 hover:text-emerald-900 dark:hover:text-white p-0.5 rounded-md hover:bg-emerald-100/50 dark:hover:bg-emerald-800/50 cursor-pointer"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
+        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
           
           {/* Section 1: Nº DE FACTURA (3 segmented boxes) */}
-          <div className="bg-emerald-50/60 p-2.5 sm:p-3 rounded-xl border border-emerald-200/80 space-y-2">
+          <div className="bg-emerald-50/60 dark:bg-[#152a1d] p-2 sm:p-2.5 rounded-xl border border-emerald-200/80 dark:border-[#1e4a2d] space-y-1.5 transition-colors">
             <div className="flex justify-between items-center">
-              <label className="block text-[11px] font-bold text-emerald-950 tracking-wider uppercase">
+              <label className="block text-[10px] font-bold text-emerald-950 dark:text-emerald-300 tracking-wider uppercase">
                 Nº DE FACTURA
               </label>
             </div>
 
-            <div className="grid grid-cols-12 gap-2 items-center">
+            <div className="grid grid-cols-12 gap-1.5 items-center">
               {/* Sucursal */}
               <div className="col-span-3">
-                <span className="text-[10px] text-emerald-900 font-semibold block mb-0.5">
+                <span className="text-[9px] text-emerald-900 dark:text-emerald-300/80 font-semibold block mb-0.5">
                   Sucursal
                 </span>
                 <input
@@ -386,17 +383,17 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
                     }
                   }}
                   placeholder="001"
-                  className="w-full bg-white border border-emerald-300 rounded-lg py-1 px-2 text-center font-mono font-bold text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] shadow-xs"
+                  className="w-full bg-white dark:bg-[#1e1f20] border border-emerald-300 dark:border-[#2d6a42] rounded-lg py-1 px-1.5 text-center font-mono font-bold text-xs text-gray-900 dark:text-[#e3e3e3] focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] shadow-2xs"
                 />
               </div>
 
-              <div className="col-span-1 text-center font-bold text-emerald-400 text-sm self-end pb-1">
+              <div className="col-span-1 text-center font-bold text-emerald-400 dark:text-emerald-500 text-xs self-end pb-1">
                 -
               </div>
 
               {/* Caja */}
               <div className="col-span-3">
-                <span className="text-[10px] text-emerald-900 font-semibold block mb-0.5">
+                <span className="text-[9px] text-emerald-900 dark:text-emerald-300/80 font-semibold block mb-0.5">
                   Caja
                 </span>
                 <input
@@ -418,17 +415,17 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
                     }
                   }}
                   placeholder="009"
-                  className="w-full bg-white border border-emerald-300 rounded-lg py-1 px-2 text-center font-mono font-bold text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] shadow-xs"
+                  className="w-full bg-white dark:bg-[#1e1f20] border border-emerald-300 dark:border-[#2d6a42] rounded-lg py-1 px-1.5 text-center font-mono font-bold text-xs text-gray-900 dark:text-[#e3e3e3] focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] shadow-2xs"
                 />
               </div>
 
-              <div className="col-span-1 text-center font-bold text-emerald-400 text-sm self-end pb-1">
+              <div className="col-span-1 text-center font-bold text-emerald-400 dark:text-emerald-500 text-xs self-end pb-1">
                 -
               </div>
 
               {/* Factura / Secuencia */}
               <div className="col-span-4">
-                <span className="text-[10px] text-emerald-900 font-semibold block mb-0.5">
+                <span className="text-[9px] text-emerald-900 dark:text-emerald-300/80 font-semibold block mb-0.5">
                   Factura
                 </span>
                 <input
@@ -450,20 +447,17 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
                     }
                   }}
                   placeholder="0006431"
-                  className="w-full bg-white border border-emerald-300 rounded-lg py-1 px-2 text-center font-mono font-bold text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] shadow-xs"
+                  className="w-full bg-white dark:bg-[#1e1f20] border border-emerald-300 dark:border-[#2d6a42] rounded-lg py-1 px-1.5 text-center font-mono font-bold text-xs text-gray-900 dark:text-[#e3e3e3] focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] shadow-2xs"
                 />
               </div>
             </div>
 
-            {/* Quick Preview & Sequence Increment Helper */}
-            <div className="flex flex-wrap items-center justify-between pt-0.5 text-xs gap-2">
-              <div className="text-emerald-900 text-[11px]">
-                Resultado Factura: <span className="font-mono font-bold text-xs bg-white px-1.5 py-0.5 rounded border border-emerald-300 text-[#107c41]">{fullInvoiceNumber}</span>
-              </div>
+            {/* Sequence Increment Helper */}
+            <div className="flex justify-end pt-0.5 text-xs">
               <button
                 type="button"
                 onClick={() => setSecuencia(prev => incrementSequence(prev))}
-                className="text-[11px] font-semibold text-[#107c41] hover:text-[#0d6334] hover:underline flex items-center gap-1"
+                className="text-[10px] font-semibold text-[#107c41] dark:text-emerald-400 hover:text-[#0d6334] dark:hover:text-emerald-300 hover:underline flex items-center gap-1 cursor-pointer"
               >
                 +1 Siguiente secuencia
               </button>
@@ -471,24 +465,24 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
           </div>
 
           {/* Section 2: PRODUCTOS / TIPO DE FACTURA (Dynamic list with keyboard autocomplete) */}
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <div className="flex justify-between items-center">
-              <label className="block text-xs font-bold text-gray-800 uppercase tracking-wide">
+              <label className="block text-[11px] font-bold text-gray-800 dark:text-[#e3e3e3] uppercase tracking-wide">
                 PRODUCTOS / TIPO DE FACTURA
               </label>
-              <span className="text-[11px] text-gray-500 font-medium">
-                Usa <kbd className="px-1 py-0.5 bg-gray-100 border border-gray-300 rounded text-[10px]">↑</kbd> <kbd className="px-1 py-0.5 bg-gray-100 border border-gray-300 rounded text-[10px]">↓</kbd> y <kbd className="px-1 py-0.5 bg-gray-100 border border-gray-300 rounded text-[10px]">Enter</kbd> para autocompletar
+              <span className="text-[10px] text-gray-500 dark:text-[#9aa0a6] font-medium">
+                Usa <kbd className="px-1 py-0.2 bg-gray-100 dark:bg-[#1e1f20] border border-gray-300 dark:border-[#3c4043] rounded text-[9px] text-gray-800 dark:text-[#e3e3e3]">↑</kbd> <kbd className="px-1 py-0.2 bg-gray-100 dark:bg-[#1e1f20] border border-gray-300 dark:border-[#3c4043] rounded text-[9px] text-gray-800 dark:text-[#e3e3e3]">↓</kbd> y <kbd className="px-1 py-0.2 bg-gray-100 dark:bg-[#1e1f20] border border-gray-300 dark:border-[#3c4043] rounded text-[9px] text-gray-800 dark:text-[#e3e3e3]">Enter</kbd> para autocompletar
               </span>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               {products.map((p, index) => {
                 const filtered = getFilteredCatalog(p.name);
                 const showDropdown = activeDropdownIndex === index && filtered.length > 0;
 
                 return (
                   <div key={p.id} className="flex items-center gap-1.5 relative">
-                    <span className="text-xs font-mono font-semibold text-gray-400 w-4 text-right">
+                    <span className="text-[11px] font-mono font-semibold text-gray-400 dark:text-[#80868b] w-4 text-right">
                       {index + 1}.
                     </span>
 
@@ -509,13 +503,13 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
                           setDropdownFocusIndex(-1);
                         }}
                         onKeyDown={(e) => handleProductKeyDown(e, index, filtered)}
-                        className="w-full bg-white border border-gray-300 rounded-lg py-1 px-2.5 uppercase text-xs sm:text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] transition h-8"
+                        className="w-full bg-white dark:bg-[#1e1f20] border border-gray-300 dark:border-[#3c4043] rounded-lg py-1 px-2.5 uppercase text-xs font-medium text-gray-900 dark:text-[#e3e3e3] focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] transition h-7"
                       />
 
                       {/* Autocomplete Dropdown List */}
                       {showDropdown && (
                         <div 
-                          className="absolute left-0 right-0 top-full mt-1 bg-white border border-emerald-400 rounded-xl shadow-2xl z-30 max-h-60 sm:max-h-72 overflow-y-auto divide-y divide-gray-100 scroll-smooth"
+                          className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-[#282a2c] border border-emerald-400 dark:border-emerald-600 rounded-xl shadow-2xl z-30 max-h-52 overflow-y-auto divide-y divide-gray-100 dark:divide-[#3c4043]/60 scroll-smooth"
                         >
                           {filtered.map((catItem, catIdx) => {
                             const isFocused = dropdownFocusIndex === catIdx;
@@ -532,17 +526,17 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
                                   selectCatalogItem(index, catItem);
                                 }}
                                 onMouseEnter={() => setDropdownFocusIndex(catIdx)}
-                                className={`px-3 py-2 text-xs sm:text-sm font-medium cursor-pointer flex justify-between items-center transition ${
+                                className={`px-2.5 py-1.5 text-xs font-medium cursor-pointer flex justify-between items-center transition ${
                                   isFocused
                                     ? 'bg-[#107c41] text-white font-semibold'
-                                    : 'text-gray-800 hover:bg-emerald-50 hover:text-[#107c41]'
+                                    : 'text-gray-800 dark:text-[#e3e3e3] hover:bg-emerald-50 dark:hover:bg-[#333538] hover:text-[#107c41] dark:hover:text-emerald-400'
                                 }`}
                               >
                                 <span className="font-bold">{catItem.name}</span>
-                                <span className={`text-[10px] px-2 py-0.5 rounded font-mono font-bold whitespace-nowrap ${
+                                <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold whitespace-nowrap ${
                                   isFocused 
                                     ? 'bg-emerald-800 text-white' 
-                                    : 'bg-emerald-100 text-[#107c41]'
+                                    : 'bg-emerald-100 dark:bg-emerald-950/80 text-[#107c41] dark:text-emerald-300'
                                 }`}>
                                   {plazoText}
                                 </span>
@@ -558,14 +552,14 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
                       type="button"
                       onClick={() => removeProductRow(index)}
                       disabled={products.length <= 1}
-                      className={`p-1.5 h-8 w-8 flex items-center justify-center rounded-lg transition ${
+                      className={`p-1 h-7 w-7 flex items-center justify-center rounded-lg transition ${
                         products.length <= 1
-                          ? 'text-gray-200 cursor-not-allowed'
-                          : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
+                          ? 'text-gray-200 dark:text-[#3c4043] cursor-not-allowed'
+                          : 'text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-[#333538] cursor-pointer'
                       }`}
                       title="Eliminar producto"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-3 h-3" />
                     </button>
                   </div>
                 );
@@ -576,19 +570,19 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
             <button
               type="button"
               onClick={() => addProductRow()}
-              className="mt-1 text-xs font-semibold text-[#107c41] hover:text-[#0d6334] bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1 rounded-lg flex items-center gap-1.5 transition cursor-pointer"
+              className="mt-0.5 text-[11px] font-semibold text-[#107c41] dark:text-emerald-400 hover:text-[#0d6334] dark:hover:text-emerald-300 bg-emerald-50 dark:bg-[#152a1d] hover:bg-emerald-100 dark:hover:bg-[#1c3a27] border border-emerald-200 dark:border-[#1e4a2d] px-2.5 py-0.5 rounded-lg flex items-center gap-1 transition cursor-pointer"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3 h-3" />
               <span>+ Agregar otro producto a esta factura</span>
             </button>
           </div>
 
           {/* Section 3: FECHAS (Venta, Elaboracion, Vencimiento Plazo, Fecha de Vencimiento) */}
-          <div className="flex flex-col sm:flex-row gap-2.5 pt-2 items-start">
+          <div className="flex flex-col sm:flex-row gap-2 pt-1 items-start">
             {/* Fecha de Venta */}
             <div className="w-full sm:flex-1">
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1 flex items-center gap-1 whitespace-nowrap">
-                <Calendar className="w-3.5 h-3.5 text-[#107c41]" />
+              <label className="block text-[10px] font-bold text-gray-700 dark:text-[#bdc1c6] uppercase tracking-wide mb-0.5 flex items-center gap-1 whitespace-nowrap">
+                <Calendar className="w-3 h-3 text-[#107c41] dark:text-emerald-400" />
                 FECHA DE VENTA
               </label>
               <input
@@ -603,14 +597,14 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
                     fechaElabRef.current?.focus();
                   }
                 }}
-                className="w-full bg-white border border-gray-300 rounded-lg py-2 px-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] font-mono"
+                className="w-full bg-white dark:bg-[#1e1f20] border border-gray-300 dark:border-[#3c4043] rounded-lg py-1 px-2 text-xs text-gray-900 dark:text-[#e3e3e3] focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] font-mono"
               />
             </div>
 
             {/* Fecha de Elaboración */}
             <div className="w-full sm:flex-1">
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1 flex items-center gap-1 whitespace-nowrap">
-                <Calendar className="w-3.5 h-3.5 text-gray-400" />
+              <label className="block text-[10px] font-bold text-gray-700 dark:text-[#bdc1c6] uppercase tracking-wide mb-0.5 flex items-center gap-1 whitespace-nowrap">
+                <Calendar className="w-3 h-3 text-gray-400 dark:text-[#9aa0a6]" />
                 FECHA DE ELABORACIÓN
               </label>
               <input
@@ -625,14 +619,14 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
                     plazoRef.current?.focus();
                   }
                 }}
-                className="w-full bg-white border border-gray-300 rounded-lg py-2 px-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] font-mono"
+                className="w-full bg-white dark:bg-[#1e1f20] border border-gray-300 dark:border-[#3c4043] rounded-lg py-1 px-2 text-xs text-gray-900 dark:text-[#e3e3e3] focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] font-mono"
               />
             </div>
 
             {/* Plazo / Vencimiento (Valor numérico + Unidad: meses / días) */}
-            <div className="w-full sm:w-[155px] shrink-0">
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1 flex items-center gap-1 whitespace-nowrap">
-                <Clock className="w-3.5 h-3.5 text-emerald-600" />
+            <div className="w-full sm:w-[140px] shrink-0">
+              <label className="block text-[10px] font-bold text-gray-700 dark:text-[#bdc1c6] uppercase tracking-wide mb-0.5 flex items-center gap-1 whitespace-nowrap">
+                <Clock className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                 PLAZO VENC.
               </label>
               <div className="flex items-center gap-1">
@@ -651,12 +645,12 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
                     }
                   }}
                   placeholder="12"
-                  className="w-14 bg-emerald-50/70 border border-emerald-300 rounded-lg py-2 px-1 text-sm font-bold text-emerald-950 focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] font-mono text-center"
+                  className="w-12 bg-emerald-50/70 dark:bg-[#1e1f20] border border-emerald-300 dark:border-[#2d6a42] rounded-lg py-1 px-1 text-xs font-bold text-emerald-950 dark:text-[#e3e3e3] focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] font-mono text-center"
                 />
                 <select
                   value={plazoUnidad}
                   onChange={(e) => handlePlazoUnidadChange(e.target.value as PlazoUnidad)}
-                  className="flex-1 bg-emerald-50/70 border border-emerald-300 rounded-lg py-2 px-1 text-xs font-bold text-emerald-950 focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] cursor-pointer"
+                  className="flex-1 bg-emerald-50/70 dark:bg-[#1e1f20] border border-emerald-300 dark:border-[#2d6a42] rounded-lg py-1 px-1 text-[11px] font-bold text-emerald-950 dark:text-[#e3e3e3] focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] cursor-pointer"
                 >
                   <option value="meses">meses</option>
                   <option value="dias">días</option>
@@ -666,8 +660,8 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
 
             {/* Fecha de Vencimiento */}
             <div className="w-full sm:flex-1">
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1 flex items-center gap-1 whitespace-nowrap">
-                <Calendar className="w-3.5 h-3.5 text-gray-400" />
+              <label className="block text-[10px] font-bold text-gray-700 dark:text-[#bdc1c6] uppercase tracking-wide mb-0.5 flex items-center gap-1 whitespace-nowrap">
+                <Calendar className="w-3 h-3 text-gray-400 dark:text-[#9aa0a6]" />
                 FECHA DE VENCIMIENTO
               </label>
               <input
@@ -682,20 +676,20 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
                     clienteRef.current?.focus();
                   }
                 }}
-                className="w-full bg-white border border-gray-300 rounded-lg py-2 px-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] font-mono"
+                className="w-full bg-white dark:bg-[#1e1f20] border border-gray-300 dark:border-[#3c4043] rounded-lg py-1 px-2 text-xs text-gray-900 dark:text-[#e3e3e3] focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] font-mono"
               />
             </div>
           </div>
 
           {/* Section 4: CLIENTE */}
           <div>
-            <div className="flex justify-between items-center mb-1">
-              <label className="block text-xs font-bold text-gray-800 uppercase tracking-wide flex items-center gap-1">
-                <User className="w-3.5 h-3.5 text-[#107c41]" />
+            <div className="flex justify-between items-center mb-0.5">
+              <label className="block text-[11px] font-bold text-gray-800 dark:text-[#e3e3e3] uppercase tracking-wide flex items-center gap-1">
+                <User className="w-3 h-3 text-[#107c41] dark:text-emerald-400" />
                 CLIENTE / RAZÓN SOCIAL
               </label>
-              <span className="text-[11px] text-emerald-800 font-medium">
-                Presiona <kbd className="px-1.5 py-0.5 bg-emerald-100/80 border border-emerald-300 rounded text-[10px] font-bold text-emerald-900 font-mono">Enter</kbd> para agregar otro producto · <kbd className="px-1.5 py-0.5 bg-emerald-700 text-white rounded text-[10px] font-bold font-mono">Shift</kbd> para ir a Guardar
+              <span className="text-[10px] text-emerald-800 dark:text-emerald-300 font-medium">
+                Presiona <kbd className="px-1 py-0.2 bg-emerald-100/80 dark:bg-[#152a1d] border border-emerald-300 dark:border-[#1e4a2d] rounded text-[9px] font-bold text-emerald-900 dark:text-emerald-200 font-mono">Enter</kbd> para agregar otro producto · <kbd className="px-1 py-0.2 bg-emerald-700 text-white rounded text-[9px] font-bold font-mono">Shift</kbd> para Guardar
               </span>
             </div>
             <input
@@ -711,30 +705,30 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
                   handleAddOrFocusNextProduct();
                 }
               }}
-              className="w-full bg-white border border-gray-300 rounded-lg py-2.5 px-3 uppercase text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41]"
+              className="w-full bg-white dark:bg-[#1e1f20] border border-gray-300 dark:border-[#3c4043] rounded-lg py-1.5 px-2.5 uppercase text-xs font-semibold text-gray-900 dark:text-[#e3e3e3] focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41]"
             />
           </div>
 
           {/* Form Actions */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+          <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-[#3c4043]">
             <button
               type="button"
               onClick={onCancel}
-              className="px-4 py-2.5 border border-gray-300 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 active:bg-gray-100 transition cursor-pointer"
+              className="px-3.5 py-1.5 border border-gray-300 dark:border-[#3c4043] text-gray-700 dark:text-[#e3e3e3] text-xs font-semibold rounded-lg hover:bg-gray-50 dark:hover:bg-[#333538] active:bg-gray-100 transition cursor-pointer"
             >
               Ver Tabla
             </button>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <button
                 ref={saveBtnRef}
                 type="submit"
                 id="btn-guardar-factura-form"
-                className="px-6 py-2.5 bg-[#107c41] hover:bg-[#0d6334] active:scale-98 text-white text-sm font-bold rounded-xl shadow-md flex items-center gap-2 transition cursor-pointer focus:ring-4 focus:ring-emerald-300"
+                className="px-4 py-1.5 bg-[#107c41] hover:bg-[#0d6334] active:scale-98 text-white text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5 transition cursor-pointer focus:ring-2 focus:ring-emerald-300"
               >
-                <Save className="w-4 h-4" />
+                <Save className="w-3.5 h-3.5" />
                 <span>Guardar Factura</span>
-                <span className="bg-emerald-900 text-emerald-100 text-[10px] px-1.5 py-0.5 rounded font-mono ml-1">
+                <span className="bg-emerald-900 text-emerald-100 text-[9px] px-1 py-0.2 rounded font-mono ml-0.5">
                   Shift + Enter
                 </span>
               </button>

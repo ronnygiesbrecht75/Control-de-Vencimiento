@@ -1,0 +1,17 @@
+{
+  "name": "Control de Facturas y Vencimiento de Productos",
+  "short_name": "Control Facturas",
+  "description": "Sistema de gestión y control de facturas con cálculo automático de vencimientos y exportación a Excel",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e1f20",
+  "theme_color": "#107c41",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

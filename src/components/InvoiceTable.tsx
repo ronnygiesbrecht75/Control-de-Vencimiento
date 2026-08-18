@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Search, 
   Plus, 
@@ -6,10 +6,14 @@ import {
   Edit3, 
   ArrowUpDown, 
   FolderOpen,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight
 } from 'lucide-react';
 import { InvoiceItem } from '../types';
-import { formatDateVenta, formatDateShort } from '../utils/formatters';
+import { formatDateShort } from '../utils/formatters';
 
 interface InvoiceTableProps {
   invoices: InvoiceItem[];
@@ -35,6 +39,10 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
   const [clientFilter, setClientFilter] = useState('');
   const [sortField, setSortField] = useState<SortField>('createdAt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  
+  // Pagination State
+  const [pageSize, setPageSize] = useState<number>(25);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   // Extract unique products and clients for filter pills
   const uniqueProducts = useMemo(() => {
@@ -83,6 +91,23 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
     return result;
   }, [invoices, searchTerm, productFilter, clientFilter, sortField, sortOrder]);
 
+  // Reset to page 1 whenever filters or sorting change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, productFilter, clientFilter, pageSize]);
+
+  // Total pages
+  const totalPages = Math.max(1, Math.ceil(filteredInvoices.length / pageSize));
+
+  // Ensure currentPage is within bounds
+  const validCurrentPage = Math.min(currentPage, totalPages);
+
+  // Paginated slice
+  const paginatedInvoices = useMemo(() => {
+    const startIndex = (validCurrentPage - 1) * pageSize;
+    return filteredInvoices.slice(startIndex, startIndex + pageSize);
+  }, [filteredInvoices, validCurrentPage, pageSize]);
+
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
@@ -92,6 +117,9 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
     }
   };
 
+  const startRecord = filteredInvoices.length > 0 ? (validCurrentPage - 1) * pageSize + 1 : 0;
+  const endRecord = Math.min(validCurrentPage * pageSize, filteredInvoices.length);
+
   // Group invoice rows visually by invoice number
   let lastNumFactura = '';
   let groupBgToggle = false;
@@ -99,24 +127,24 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
   return (
     <div className="space-y-4">
       {/* Top Filter & Action Bar */}
-      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-200 shadow-xs space-y-3">
+      <div className="bg-white dark:bg-[#282a2c] p-4 sm:p-5 rounded-2xl border border-gray-200 dark:border-[#3c4043] shadow-xs space-y-3 transition-colors">
         <div className="flex flex-wrap items-center justify-between gap-3">
           
           {/* Main Search Input */}
           <div className="relative flex-1 min-w-[260px] sm:min-w-[320px]">
-            <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-gray-400 dark:text-[#9aa0a6] absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               id="invoice-search-input"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar por Nº Factura, Producto, Cliente, Fecha..."
-              className="w-full pl-10 pr-9 py-2 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] transition"
+              className="w-full pl-10 pr-9 py-2 bg-gray-50 dark:bg-[#1e1f20] border border-gray-300 dark:border-[#3c4043] rounded-xl text-sm text-gray-900 dark:text-[#e3e3e3] placeholder-gray-400 dark:placeholder-[#80868b] focus:bg-white dark:focus:bg-[#1e1f20] focus:outline-none focus:ring-2 focus:ring-[#107c41] focus:border-[#107c41] transition"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-0.5 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -136,14 +164,14 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
         </div>
 
         {/* Secondary filters & summary stats */}
-        <div className="flex flex-wrap items-center justify-between pt-2 border-t border-gray-100 text-xs text-gray-600 gap-2">
+        <div className="flex flex-wrap items-center justify-between pt-2 border-t border-gray-100 dark:border-[#3c4043] text-xs text-gray-600 dark:text-[#9aa0a6] gap-3">
           {/* Dropdown Filters */}
           <div className="flex flex-wrap items-center gap-2">
             {/* Product Filter */}
             <select
               value={productFilter}
               onChange={(e) => setProductFilter(e.target.value)}
-              className="bg-gray-50 border border-gray-200 text-gray-700 py-1 px-2.5 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-[#107c41]"
+              className="bg-gray-50 dark:bg-[#1e1f20] border border-gray-200 dark:border-[#3c4043] text-gray-700 dark:text-[#e3e3e3] py-1.5 px-2.5 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-[#107c41] cursor-pointer"
             >
               <option value="">Todos los Productos ({uniqueProducts.length})</option>
               {uniqueProducts.map(prod => (
@@ -155,7 +183,7 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
             <select
               value={clientFilter}
               onChange={(e) => setClientFilter(e.target.value)}
-              className="bg-gray-50 border border-gray-200 text-gray-700 py-1 px-2.5 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-[#107c41]"
+              className="bg-gray-50 dark:bg-[#1e1f20] border border-gray-200 dark:border-[#3c4043] text-gray-700 dark:text-[#e3e3e3] py-1.5 px-2.5 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-[#107c41] cursor-pointer"
             >
               <option value="">Todos los Clientes ({uniqueClients.length})</option>
               {uniqueClients.map(c => (
@@ -166,29 +194,30 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
             {(productFilter || clientFilter) && (
               <button
                 onClick={() => { setProductFilter(''); setClientFilter(''); }}
-                className="text-emerald-700 hover:text-emerald-900 font-semibold flex items-center gap-1 hover:underline"
+                className="text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-300 font-semibold flex items-center gap-1 hover:underline cursor-pointer ml-1"
               >
-                <X className="w-3 h-3" /> Limpiar filtros
+                <X className="w-3 hot-3" /> Limpiar filtros
               </button>
             )}
           </div>
 
-          {/* Quick Metrics */}
-          <div className="flex items-center gap-3 font-medium">
+          {/* Counts */}
+          <div className="flex flex-wrap items-center gap-3 font-medium">
             <span>
-              Filas mostradas: <b className="text-gray-900 font-bold">{filteredInvoices.length}</b>
-              {filteredInvoices.length !== invoices.length && ` de ${invoices.length}`}
+              Total filas: <b className="text-gray-900 dark:text-[#f1f3f4] font-bold">{filteredInvoices.length}</b>
             </span>
-            <span className="text-gray-300">|</span>
+
+            <span className="text-gray-300 dark:text-[#3c4043]">|</span>
+
             <span>
-              Facturas: <b className="text-[#107c41] font-bold">{uniqueInvoicesCount}</b>
+              Facturas: <b className="text-[#107c41] dark:text-emerald-400 font-bold">{uniqueInvoicesCount}</b>
             </span>
           </div>
         </div>
       </div>
 
       {/* Spreadsheet Table Container */}
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-[#282a2c] border border-gray-200 dark:border-[#3c4043] rounded-2xl shadow-xs overflow-hidden transition-colors">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -196,7 +225,8 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
                 {/* Column 1: Nº DE FACTURA */}
                 <th 
                   onClick={() => handleSort('numFactura')}
-                  className="py-1.5 px-2.5 border-r border-[#0d6334] cursor-pointer hover:bg-emerald-800 transition select-none"
+                  className="py-1.5 px-2.5 border-r border-[#0d6334] cursor-pointer hover:bg-[#0d6334] transition select-none"
+                  title="Ordenar por Nº de Factura"
                 >
                   <div className="flex items-center gap-1">
                     <span>Nº DE FACTURA</span>
@@ -207,7 +237,8 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
                 {/* Column 2: TIPO DE FACTURA (PRODUCTO) */}
                 <th 
                   onClick={() => handleSort('tipoFactura')}
-                  className="py-1.5 px-2.5 border-r border-[#0d6334] cursor-pointer hover:bg-emerald-800 transition select-none"
+                  className="py-1.5 px-2.5 border-r border-[#0d6334] cursor-pointer hover:bg-[#0d6334] transition select-none"
+                  title="Ordenar por Producto"
                 >
                   <div className="flex items-center gap-1">
                     <span>TIPO DE FACTURA (PRODUCTO)</span>
@@ -218,7 +249,8 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
                 {/* Column 3: FECHA DE VENTA */}
                 <th 
                   onClick={() => handleSort('fechaVenta')}
-                  className="py-1.5 px-2.5 border-r border-[#0d6334] cursor-pointer hover:bg-emerald-800 transition select-none whitespace-nowrap"
+                  className="py-1.5 px-2.5 border-r border-[#0d6334] cursor-pointer hover:bg-[#0d6334] transition select-none whitespace-nowrap"
+                  title="Ordenar por Fecha de Venta"
                 >
                   <div className="flex items-center gap-1">
                     <span>FECHA DE VENTA</span>
@@ -229,7 +261,8 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
                 {/* Column 4: FECHA DE ELABORACION */}
                 <th 
                   onClick={() => handleSort('fechaElaboracion')}
-                  className="py-1.5 px-2.5 border-r border-[#0d6334] cursor-pointer hover:bg-emerald-800 transition select-none whitespace-nowrap"
+                  className="py-1.5 px-2.5 border-r border-[#0d6334] cursor-pointer hover:bg-[#0d6334] transition select-none whitespace-nowrap"
+                  title="Ordenar por Fecha de Elaboración"
                 >
                   <div className="flex items-center gap-1">
                     <span>FECHA DE ELABORACIÓN</span>
@@ -240,7 +273,8 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
                 {/* Column 5: FECHA DE VENCIMIENTO */}
                 <th 
                   onClick={() => handleSort('vencimiento')}
-                  className="py-1.5 px-2.5 border-r border-[#0d6334] cursor-pointer hover:bg-emerald-800 transition select-none whitespace-nowrap"
+                  className="py-1.5 px-2.5 border-r border-[#0d6334] cursor-pointer hover:bg-[#0d6334] transition select-none whitespace-nowrap"
+                  title="Ordenar por Fecha de Vencimiento"
                 >
                   <div className="flex items-center gap-1">
                     <span>FECHA DE VENCIMIENTO</span>
@@ -251,7 +285,8 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
                 {/* Column 6: CLIENTE */}
                 <th 
                   onClick={() => handleSort('cliente')}
-                  className="py-1.5 px-2.5 border-r border-[#0d6334] cursor-pointer hover:bg-emerald-800 transition select-none"
+                  className="py-1.5 px-2.5 border-r border-[#0d6334] cursor-pointer hover:bg-[#0d6334] transition select-none"
+                  title="Ordenar por Cliente"
                 >
                   <div className="flex items-center gap-1">
                     <span>CLIENTE</span>
@@ -266,8 +301,8 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
               </tr>
             </thead>
 
-            <tbody className="text-xs divide-y divide-gray-200 font-sans">
-              {filteredInvoices.map((item) => {
+            <tbody className="text-xs divide-y divide-gray-200 dark:divide-[#3c4043]/60 font-sans">
+              {paginatedInvoices.map((item) => {
                 // Group row alternating background
                 if (item.numFactura !== lastNumFactura) {
                   groupBgToggle = !groupBgToggle;
@@ -277,39 +312,39 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
                 return (
                   <tr
                     key={item.id}
-                    className={`transition hover:bg-emerald-50/70 ${
+                    className={`transition hover:bg-emerald-50/70 dark:hover:bg-[#333538] ${
                       groupBgToggle
-                        ? 'bg-emerald-50/20'
-                        : 'bg-white'
+                        ? 'bg-emerald-50/20 dark:bg-[#232527]'
+                        : 'bg-white dark:bg-[#282a2c]'
                     }`}
                   >
                     {/* Nº Factura */}
-                    <td className="py-1 px-2.5 font-medium font-mono text-gray-800 border-r border-gray-100 whitespace-nowrap">
+                    <td className="py-1 px-2.5 font-medium font-mono text-gray-800 dark:text-[#e3e3e3] border-r border-gray-100 dark:border-[#3c4043]/60 whitespace-nowrap">
                       {item.numFactura}
                     </td>
 
                     {/* Tipo de Factura / Producto */}
-                    <td className="py-1 px-2.5 font-normal text-gray-800 border-r border-gray-100">
+                    <td className="py-1 px-2.5 font-normal text-gray-800 dark:text-[#e3e3e3] border-r border-gray-100 dark:border-[#3c4043]/60">
                       {item.tipoFactura}
                     </td>
 
                     {/* Fecha de Venta (DD,MM,YY) */}
-                    <td className="py-1 px-2.5 font-normal text-gray-700 border-r border-gray-100 whitespace-nowrap">
+                    <td className="py-1 px-2.5 font-normal text-gray-700 dark:text-[#bdc1c6] border-r border-gray-100 dark:border-[#3c4043]/60 whitespace-nowrap">
                       {formatDateShort(item.fechaVenta)}
                     </td>
 
                     {/* Fecha Elaboracion (DD,MM,YY) */}
-                    <td className="py-1 px-2.5 font-normal text-gray-700 border-r border-gray-100 whitespace-nowrap">
+                    <td className="py-1 px-2.5 font-normal text-gray-700 dark:text-[#bdc1c6] border-r border-gray-100 dark:border-[#3c4043]/60 whitespace-nowrap">
                       {formatDateShort(item.fechaElaboracion)}
                     </td>
 
                     {/* Vencimiento (DD,MM,YY) */}
-                    <td className="py-1 px-2.5 font-normal text-gray-700 border-r border-gray-100 whitespace-nowrap">
+                    <td className="py-1 px-2.5 font-normal text-gray-700 dark:text-[#bdc1c6] border-r border-gray-100 dark:border-[#3c4043]/60 whitespace-nowrap">
                       {formatDateShort(item.vencimiento)}
                     </td>
 
                     {/* Cliente */}
-                    <td className="py-1 px-2.5 font-normal text-gray-800 border-r border-gray-100">
+                    <td className="py-1 px-2.5 font-normal text-gray-800 dark:text-[#e3e3e3] border-r border-gray-100 dark:border-[#3c4043]/60">
                       {item.cliente}
                     </td>
 
@@ -318,14 +353,14 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
                       <div className="flex items-center justify-center gap-1">
                         <button
                           onClick={() => onEditInvoice(item)}
-                          className="p-0.5 text-gray-400 hover:text-emerald-700 hover:bg-emerald-50 rounded transition"
+                          className="p-0.5 text-gray-400 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-[#333538] rounded transition cursor-pointer"
                           title="Editar fila"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => onDeleteInvoice(item.id)}
-                          className="p-0.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
+                          className="p-0.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-[#333538] rounded transition cursor-pointer"
                           title="Eliminar fila"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -341,13 +376,13 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
 
         {/* Empty State */}
         {filteredInvoices.length === 0 && (
-          <div className="p-12 text-center text-gray-500 space-y-3">
-            <div className="w-14 h-14 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center mx-auto">
+          <div className="p-12 text-center text-gray-500 dark:text-[#9aa0a6] space-y-3">
+            <div className="w-14 h-14 bg-gray-100 dark:bg-[#1e1f20] text-gray-400 dark:text-[#9aa0a6] rounded-full flex items-center justify-center mx-auto">
               <FolderOpen className="w-7 h-7" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-800 text-sm">No se encontraron facturas</h3>
-              <p className="text-xs text-gray-500 max-w-sm mx-auto mt-1">
+              <h3 className="font-semibold text-gray-800 dark:text-[#f1f3f4] text-sm">No se encontraron facturas</h3>
+              <p className="text-xs text-gray-500 dark:text-[#9aa0a6] max-w-sm mx-auto mt-1">
                 {searchTerm || productFilter || clientFilter
                   ? 'No hay registros que coincidan con los filtros aplicados.'
                   : 'Aún no hay facturas registradas en el libro.'}
@@ -356,10 +391,87 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
             <div className="pt-2">
               <button
                 onClick={onAddNew}
-                className="bg-[#107c41] hover:bg-[#0d6334] text-white text-xs font-semibold px-4 py-2 rounded-xl inline-flex items-center gap-1.5 transition shadow-xs"
+                className="bg-[#107c41] hover:bg-[#0d6334] text-white text-xs font-semibold px-4 py-2 rounded-xl inline-flex items-center gap-1.5 transition shadow-xs cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Cargar Nueva Factura</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Pagination Footer */}
+        {filteredInvoices.length > 0 && (
+          <div className="px-4 py-3 bg-gray-50 dark:bg-[#282a2c] border-t border-gray-200 dark:border-[#3c4043] flex flex-wrap items-center justify-between gap-3 text-xs text-gray-600 dark:text-[#9aa0a6]">
+            {/* Range Counter & Rows Selector */}
+            <div className="flex items-center gap-3">
+              <span>
+                Mostrando <b className="text-gray-900 dark:text-[#f1f3f4] font-semibold">{startRecord}</b> a <b className="text-gray-900 dark:text-[#f1f3f4] font-semibold">{endRecord}</b> de <b className="text-gray-900 dark:text-[#f1f3f4] font-semibold">{filteredInvoices.length}</b> filas
+              </span>
+              
+              <div className="hidden sm:flex items-center gap-1.5 border-l border-gray-300 dark:border-[#3c4043] pl-3">
+                <span className="text-gray-500 dark:text-[#9aa0a6]">Por página:</span>
+                {[25, 50, 100].map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setPageSize(size)}
+                    className={`px-2 py-0.5 rounded text-xs font-bold transition cursor-pointer ${
+                      pageSize === size
+                        ? 'bg-[#107c41] text-white shadow-2xs'
+                        : 'bg-white dark:bg-[#1e1f20] text-gray-700 dark:text-[#e3e3e3] border border-gray-200 dark:border-[#3c4043] hover:bg-gray-100 dark:hover:bg-[#333538]'
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="flex items-center gap-1">
+              {/* First Page */}
+              <button
+                onClick={() => setCurrentPage(1)}
+                disabled={validCurrentPage === 1}
+                className="p-1.5 rounded-lg border border-gray-200 dark:border-[#3c4043] bg-white dark:bg-[#1e1f20] text-gray-600 dark:text-[#e3e3e3] hover:bg-gray-100 dark:hover:bg-[#333538] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition"
+                title="Primera página"
+              >
+                <ChevronsLeft className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Previous Page */}
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={validCurrentPage === 1}
+                className="p-1.5 rounded-lg border border-gray-200 dark:border-[#3c4043] bg-white dark:bg-[#1e1f20] text-gray-600 dark:text-[#e3e3e3] hover:bg-gray-100 dark:hover:bg-[#333538] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition"
+                title="Página anterior"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Page Number Indicator */}
+              <div className="px-3 py-1 bg-white dark:bg-[#1e1f20] border border-gray-200 dark:border-[#3c4043] rounded-lg font-medium text-gray-700 dark:text-[#e3e3e3] text-xs">
+                Página <b className="text-[#107c41] dark:text-emerald-400">{validCurrentPage}</b> de <b className="text-gray-900 dark:text-[#f1f3f4]">{totalPages}</b>
+              </div>
+
+              {/* Next Page */}
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={validCurrentPage >= totalPages}
+                className="p-1.5 rounded-lg border border-gray-200 dark:border-[#3c4043] bg-white dark:bg-[#1e1f20] text-gray-600 dark:text-[#e3e3e3] hover:bg-gray-100 dark:hover:bg-[#333538] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition"
+                title="Página siguiente"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Last Page */}
+              <button
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={validCurrentPage >= totalPages}
+                className="p-1.5 rounded-lg border border-gray-200 dark:border-[#3c4043] bg-white dark:bg-[#1e1f20] text-gray-600 dark:text-[#e3e3e3] hover:bg-gray-100 dark:hover:bg-[#333538] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition"
+                title="Última página"
+              >
+                <ChevronsRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>

@@ -20,7 +20,9 @@ export interface CatalogProduct {
   usageCount?: number;
 }
 
-export type ActiveTab = 'registro' | 'agregar' | 'productos';
+export type ActiveTab = 'registro' | 'agregar' | 'productos' | 'ajustes';
+
+export type ThemeMode = 'light' | 'dark' | 'system';
 
 export interface ToastMessage {
   id: string;

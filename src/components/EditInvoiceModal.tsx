@@ -91,22 +91,22 @@ export const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative border border-gray-200">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-[#282a2c] rounded-2xl max-w-lg w-full p-6 shadow-2xl relative border border-gray-200 dark:border-[#3c4043] transition-colors">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-1.5 rounded-lg"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-white p-1.5 rounded-lg cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-3 mb-5 border-b border-gray-100 pb-3">
-          <div className="bg-emerald-100 p-2.5 rounded-xl text-[#107c41]">
+        <div className="flex items-center gap-3 mb-5 border-b border-gray-100 dark:border-[#3c4043] pb-3">
+          <div className="bg-emerald-100 dark:bg-emerald-950/80 p-2.5 rounded-xl text-[#107c41] dark:text-emerald-400">
             <FileEdit className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-gray-900 text-base">Editar Registro de Factura</h3>
-            <p className="text-xs text-gray-500">Modifique los datos individuales de esta fila</p>
+            <h3 className="font-bold text-gray-900 dark:text-[#f1f3f4] text-base">Editar Registro de Factura</h3>
+            <p className="text-xs text-gray-500 dark:text-[#9aa0a6]">Modifique los datos individuales de esta fila</p>
           </div>
         </div>
 
@@ -114,7 +114,7 @@ export const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
           
           {/* Nº Factura 3 parts */}
           <div className="space-y-1">
-            <label className="block text-xs font-bold text-gray-700 uppercase">
+            <label className="block text-xs font-bold text-gray-700 dark:text-[#bdc1c6] uppercase">
               Nº DE FACTURA
             </label>
             <div className="grid grid-cols-12 gap-2 items-center">
@@ -126,9 +126,9 @@ export const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
                 onChange={(e) => setSucursal(e.target.value.replace(/\D/g, ''))}
                 onFocus={(e) => e.target.select()}
                 onBlur={() => setSucursal(padZeroes(sucursal, 3))}
-                className="col-span-3 bg-gray-50 border border-gray-300 rounded-lg py-1.5 text-center font-mono font-bold text-sm"
+                className="col-span-3 bg-gray-50 dark:bg-[#1e1f20] border border-gray-300 dark:border-[#3c4043] rounded-lg py-1.5 text-center font-mono font-bold text-sm text-gray-900 dark:text-[#e3e3e3]"
               />
-              <span className="col-span-1 text-center font-bold text-gray-400">-</span>
+              <span className="col-span-1 text-center font-bold text-gray-400 dark:text-[#80868b]">-</span>
               <input
                 type="text"
                 required
@@ -137,9 +137,9 @@ export const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
                 onChange={(e) => setCaja(e.target.value.replace(/\D/g, ''))}
                 onFocus={(e) => e.target.select()}
                 onBlur={() => setCaja(padZeroes(caja, 3))}
-                className="col-span-3 bg-gray-50 border border-gray-300 rounded-lg py-1.5 text-center font-mono font-bold text-sm"
+                className="col-span-3 bg-gray-50 dark:bg-[#1e1f20] border border-gray-300 dark:border-[#3c4043] rounded-lg py-1.5 text-center font-mono font-bold text-sm text-gray-900 dark:text-[#e3e3e3]"
               />
-              <span className="col-span-1 text-center font-bold text-gray-400">-</span>
+              <span className="col-span-1 text-center font-bold text-gray-400 dark:text-[#80868b]">-</span>
               <input
                 type="text"
                 required
@@ -148,14 +148,14 @@ export const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
                 onChange={(e) => setSecuencia(e.target.value.replace(/\D/g, ''))}
                 onFocus={(e) => e.target.select()}
                 onBlur={() => setSecuencia(padZeroes(secuencia, 7))}
-                className="col-span-4 bg-gray-50 border border-gray-300 rounded-lg py-1.5 text-center font-mono font-bold text-sm"
+                className="col-span-4 bg-gray-50 dark:bg-[#1e1f20] border border-gray-300 dark:border-[#3c4043] rounded-lg py-1.5 text-center font-mono font-bold text-sm text-gray-900 dark:text-[#e3e3e3]"
               />
             </div>
           </div>
 
           {/* Tipo Factura / Producto */}
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+            <label className="block text-xs font-bold text-gray-700 dark:text-[#bdc1c6] uppercase mb-1">
               TIPO DE FACTURA (PRODUCTO)
             </label>
             <input
@@ -164,7 +164,7 @@ export const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
               value={tipoFactura}
               onChange={(e) => handleTipoFacturaChange(e.target.value.toUpperCase())}
               list="edit-catalog-suggestions"
-              className="w-full bg-gray-50 border border-gray-300 rounded-lg py-2 px-3 text-sm font-semibold uppercase focus:bg-white focus:ring-2 focus:ring-[#107c41]"
+              className="w-full bg-gray-50 dark:bg-[#1e1f20] border border-gray-300 dark:border-[#3c4043] rounded-lg py-2 px-3 text-sm font-semibold uppercase text-gray-900 dark:text-[#e3e3e3] focus:bg-white dark:focus:bg-[#1e1f20] focus:ring-2 focus:ring-[#107c41]"
             />
             <datalist id="edit-catalog-suggestions">
               {catalog.map(c => (
@@ -178,7 +178,7 @@ export const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
           {/* Fechas */}
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="w-full sm:flex-1">
-              <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1 whitespace-nowrap">
+              <label className="block text-[11px] font-bold text-gray-600 dark:text-[#bdc1c6] uppercase mb-1 whitespace-nowrap">
                 F. VENTA
               </label>
               <input
@@ -186,12 +186,12 @@ export const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
                 required
                 value={fechaVenta}
                 onChange={(e) => setFechaVenta(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-300 rounded-lg py-1.5 px-1.5 text-xs font-mono"
+                className="w-full bg-gray-50 dark:bg-[#1e1f20] border border-gray-300 dark:border-[#3c4043] rounded-lg py-1.5 px-1.5 text-xs font-mono text-gray-900 dark:text-[#e3e3e3]"
               />
             </div>
 
             <div className="w-full sm:flex-1">
-              <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1 whitespace-nowrap">
+              <label className="block text-[11px] font-bold text-gray-600 dark:text-[#bdc1c6] uppercase mb-1 whitespace-nowrap">
                 F. ELABORACIÓN
               </label>
               <input
@@ -199,12 +199,12 @@ export const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
                 required
                 value={fechaElaboracion}
                 onChange={(e) => handleElabChange(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-300 rounded-lg py-1.5 px-1.5 text-xs font-mono"
+                className="w-full bg-gray-50 dark:bg-[#1e1f20] border border-gray-300 dark:border-[#3c4043] rounded-lg py-1.5 px-1.5 text-xs font-mono text-gray-900 dark:text-[#e3e3e3]"
               />
             </div>
 
             <div className="w-full sm:w-[130px] shrink-0">
-              <label className="block text-[11px] font-bold text-emerald-800 uppercase mb-1 whitespace-nowrap">
+              <label className="block text-[11px] font-bold text-emerald-800 dark:text-emerald-300 uppercase mb-1 whitespace-nowrap">
                 PLAZO VENC.
               </label>
               <div className="flex items-center gap-1">
@@ -216,12 +216,12 @@ export const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
                   onChange={(e) => handlePlazoValorChange(e.target.value)}
                   onFocus={(e) => e.target.select()}
                   placeholder="12"
-                  className="w-14 bg-emerald-50/70 border border-emerald-300 rounded-lg py-1.5 px-1 text-xs font-bold text-center font-mono"
+                  className="w-14 bg-emerald-50/70 dark:bg-[#1e1f20] border border-emerald-300 dark:border-[#2d6a42] rounded-lg py-1.5 px-1 text-xs font-bold text-center font-mono text-emerald-950 dark:text-[#e3e3e3]"
                 />
                 <select
                   value={plazoUnidad}
                   onChange={(e) => handlePlazoUnidadChange(e.target.value as PlazoUnidad)}
-                  className="flex-1 bg-emerald-50/70 border border-emerald-300 rounded-lg py-1.5 px-1 text-[11px] font-bold text-emerald-950"
+                  className="flex-1 bg-emerald-50/70 dark:bg-[#1e1f20] border border-emerald-300 dark:border-[#2d6a42] rounded-lg py-1.5 px-1 text-[11px] font-bold text-emerald-950 dark:text-[#e3e3e3] cursor-pointer"
                 >
                   <option value="meses">meses</option>
                   <option value="dias">días</option>
@@ -230,7 +230,7 @@ export const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
             </div>
 
             <div className="w-full sm:flex-1">
-              <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1 whitespace-nowrap">
+              <label className="block text-[11px] font-bold text-gray-600 dark:text-[#bdc1c6] uppercase mb-1 whitespace-nowrap">
                 F. VENCIMIENTO
               </label>
               <input
@@ -238,14 +238,14 @@ export const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
                 required
                 value={vencimiento}
                 onChange={(e) => setVencimiento(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-300 rounded-lg py-1.5 px-1.5 text-xs font-mono"
+                className="w-full bg-gray-50 dark:bg-[#1e1f20] border border-gray-300 dark:border-[#3c4043] rounded-lg py-1.5 px-1.5 text-xs font-mono text-gray-900 dark:text-[#e3e3e3]"
               />
             </div>
           </div>
 
           {/* Cliente */}
           <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+            <label className="block text-xs font-bold text-gray-700 dark:text-[#bdc1c6] uppercase mb-1">
               CLIENTE
             </label>
             <input
@@ -253,21 +253,21 @@ export const EditInvoiceModal: React.FC<EditInvoiceModalProps> = ({
               required
               value={cliente}
               onChange={(e) => setCliente(e.target.value.toUpperCase())}
-              className="w-full bg-gray-50 border border-gray-300 rounded-lg py-2 px-3 text-sm font-semibold uppercase focus:bg-white focus:ring-2 focus:ring-[#107c41]"
+              className="w-full bg-gray-50 dark:bg-[#1e1f20] border border-gray-300 dark:border-[#3c4043] rounded-lg py-2 px-3 text-sm font-semibold uppercase text-gray-900 dark:text-[#e3e3e3] focus:bg-white dark:focus:bg-[#1e1f20] focus:ring-2 focus:ring-[#107c41]"
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-gray-100">
+          <div className="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-[#3c4043]">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 text-gray-700 text-xs font-semibold rounded-lg hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 dark:border-[#3c4043] text-gray-700 dark:text-[#e3e3e3] text-xs font-semibold rounded-lg hover:bg-gray-50 dark:hover:bg-[#333538] cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-[#107c41] hover:bg-[#0d6334] text-white text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5"
+              className="px-5 py-2 bg-[#107c41] hover:bg-[#0d6334] text-white text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer"
             >
               <Save className="w-3.5 h-3.5" />
               <span>Guardar Cambios</span>

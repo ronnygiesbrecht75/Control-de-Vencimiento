@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
-import { Tabs } from './components/Tabs';
 import { InvoiceTable } from './components/InvoiceTable';
 import { InvoiceForm } from './components/InvoiceForm';
 import { ProductCatalog } from './components/ProductCatalog';
+import { SettingsTab } from './components/SettingsTab';
 import { EditInvoiceModal } from './components/EditInvoiceModal';
 
-import { InvoiceItem, CatalogProduct, ActiveTab, PlazoUnidad } from './types';
+import { InvoiceItem, CatalogProduct, ActiveTab, PlazoUnidad, ThemeMode } from './types';
 import { 
   loadStoredInvoices, 
   saveStoredInvoices, 
@@ -15,15 +16,30 @@ import {
   INITIAL_INVOICES,
   INITIAL_CATALOG
 } from './utils/storage';
+import { getStoredTheme, saveStoredTheme, applyTheme } from './utils/theme';
 import { exportInvoicesToExcel } from './utils/excel';
 
 export default function App() {
   const [invoices, setInvoices] = useState<InvoiceItem[]>(() => loadStoredInvoices());
   const [catalog, setCatalog] = useState<CatalogProduct[]>(() => loadStoredCatalog());
   const [activeTab, setActiveTab] = useState<ActiveTab>('registro');
+  const [theme, setTheme] = useState<ThemeMode>(() => getStoredTheme());
 
   // Modals
   const [editingInvoice, setEditingInvoice] = useState<InvoiceItem | null>(null);
+
+  // Theme Sync & System changes listener
+  useEffect(() => {
+    applyTheme(theme);
+    saveStoredTheme(theme);
+
+    if (theme === 'system') {
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
+      const listener = () => applyTheme('system');
+      media.addEventListener('change', listener);
+      return () => media.removeEventListener('change', listener);
+    }
+  }, [theme]);
 
   // Sync to local storage on changes
   useEffect(() => {
@@ -149,6 +165,12 @@ export default function App() {
     }
   };
 
+  // Import backup callback
+  const handleImportBackupData = (importedInvoices: InvoiceItem[], importedCatalog: CatalogProduct[]) => {
+    setInvoices(importedInvoices);
+    setCatalog(importedCatalog);
+  };
+
   // Excel Export
   const handleExportExcel = () => {
     if (invoices.length === 0) {
@@ -162,63 +184,81 @@ export default function App() {
   const lastInvoiceNumber = invoices.length > 0 ? invoices[0].numFactura : '001-009-0006431';
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100 text-gray-900">
+    <div className="h-screen w-screen overflow-hidden flex flex-col lg:flex-row bg-[#f8f9fa] dark:bg-[#1e1f20] text-gray-900 dark:text-[#e3e3e3] transition-colors">
       
-      {/* Top Header */}
-      <Header
-        onExportExcel={handleExportExcel}
-        onResetData={handleResetAllData}
-        activeTab={activeTab}
-        invoiceCount={invoices.length}
-      />
-
-      {/* Main Sheet Navigation Tabs */}
-      <Tabs
+      {/* Left Sidebar Navigation (Fixed & Non-scrolling) */}
+      <Sidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
         invoiceCount={invoices.length}
         catalogCount={catalog.length}
+        onExportExcel={handleExportExcel}
+        onResetData={handleResetAllData}
       />
 
-      {/* Sheet Content Area */}
-      <main className="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
-        {activeTab === 'registro' && (
-          <InvoiceTable
-            invoices={invoices}
-            onDeleteInvoice={handleDeleteInvoice}
-            onEditInvoice={setEditingInvoice}
-            onAddNew={() => setActiveTab('agregar')}
+      {/* Main Content Area to the Right (Scrolls independently) */}
+      <div className="flex-1 min-w-0 h-full overflow-y-auto flex flex-col">
+        {/* Top Header */}
+        <div className="sticky top-0 z-20 shrink-0">
+          <Header
             onExportExcel={handleExportExcel}
+            onResetData={handleResetAllData}
+            activeTab={activeTab}
+            invoiceCount={invoices.length}
           />
-        )}
-
-        {activeTab === 'agregar' && (
-          <InvoiceForm
-            catalog={catalogWithUsage}
-            onSaveInvoice={handleSaveInvoice}
-            onCancel={() => setActiveTab('registro')}
-            lastInvoiceNumber={lastInvoiceNumber}
-          />
-        )}
-
-        {activeTab === 'productos' && (
-          <ProductCatalog
-            catalog={catalogWithUsage}
-            onAddProduct={handleAddCatalogProduct}
-            onUpdateProduct={handleUpdateCatalogProduct}
-            onDeleteProduct={handleDeleteCatalogProduct}
-            onResetCatalog={handleResetCatalog}
-          />
-        )}
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 py-3 text-center text-xs text-gray-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-wrap justify-between items-center gap-2">
-          <span>Control de Facturas y Vencimiento de Prod. &bull; Sistema de Gestión</span>
-          <span className="font-mono text-[11px] text-gray-400">Registro Simplificado</span>
         </div>
-      </footer>
+
+        {/* Dynamic Sheet Content */}
+        <main className="flex-1 p-3 sm:p-5 lg:p-6 w-full max-w-[1600px] mx-auto">
+          {activeTab === 'registro' && (
+            <InvoiceTable
+              invoices={invoices}
+              onDeleteInvoice={handleDeleteInvoice}
+              onEditInvoice={setEditingInvoice}
+              onAddNew={() => setActiveTab('agregar')}
+              onExportExcel={handleExportExcel}
+            />
+          )}
+
+          {activeTab === 'agregar' && (
+            <InvoiceForm
+              catalog={catalogWithUsage}
+              onSaveInvoice={handleSaveInvoice}
+              onCancel={() => setActiveTab('registro')}
+              lastInvoiceNumber={lastInvoiceNumber}
+            />
+          )}
+
+          {activeTab === 'productos' && (
+            <ProductCatalog
+              catalog={catalogWithUsage}
+              onAddProduct={handleAddCatalogProduct}
+              onUpdateProduct={handleUpdateCatalogProduct}
+              onDeleteProduct={handleDeleteCatalogProduct}
+              onResetCatalog={handleResetCatalog}
+            />
+          )}
+
+          {activeTab === 'ajustes' && (
+            <SettingsTab
+              currentTheme={theme}
+              onThemeChange={setTheme}
+              invoices={invoices}
+              catalog={catalog}
+              onImportData={handleImportBackupData}
+              onResetData={handleResetAllData}
+            />
+          )}
+        </main>
+
+        {/* Footer */}
+        <footer className="bg-white dark:bg-[#282a2c] border-t border-gray-200 dark:border-[#3c4043] py-2.5 px-6 text-xs text-gray-500 dark:text-[#9aa0a6] shrink-0 transition-colors">
+          <div className="flex flex-wrap justify-between items-center gap-2 max-w-[1600px] mx-auto">
+            <span>Control de Facturas y Vencimiento de Prod. &bull; Sistema de Gestión</span>
+            <span className="font-mono text-[11px] text-gray-400 dark:text-[#80868b]">Excel Spreadsheets &bull; v1.2</span>
+          </div>
+        </footer>
+      </div>
 
       {/* Edit Row Modal */}
       {editingInvoice && (
