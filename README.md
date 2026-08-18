@@ -28,17 +28,37 @@ Ejecuta el siguiente comando en la carpeta del proyecto:
 npm install
 ```
 
-### 3. Iniciar la aplicación en modo desarrollo
-Para abrir la aplicación localmente:
+### 3. Iniciar la aplicación
+
+#### Opción A: Modo Web (Navegador)
 ```bash
 npm run dev
 ```
+Abre tu navegador web en `http://localhost:3000`.
 
-Abre tu navegador web y entra a la dirección que aparece en la terminal (por defecto: `http://localhost:3000` o `http://localhost:5173`).
+#### Opción B: Modo Aplicación Nativa de Escritorio (Electron)
+```bash
+npm run electron:dev
+```
+Se abrirá automáticamente como una ventana nativa de escritorio independiente.
 
 ---
 
-## 📦 Construir para Producción (Build)
+## 🖥️ Generar Instalador `.exe` para Windows
+
+Para compilar la aplicación y crear un instalador ejecutable `.exe` independiente para Windows:
+
+```bash
+npm run electron:build
+```
+
+Esto generará en la carpeta `release/`:
+- **Instalador NSIS (`.exe`)**: Crea el acceso directo en el Escritorio y Menú Inicio.
+- **Versión Portable (`.exe`)**: Funciona directamente sin necesidad de instalar (ideal para llevar en un pendrive).
+
+---
+
+## 📦 Construir para Servidor Web (Build)
 
 Si deseas generar los archivos optimizados listos para desplegar en cualquier servidor web:
 ```bash
