@@ -30,18 +30,91 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   onImportData
 }) => {
   const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
   const [updateResult, setUpdateResult] = useState<{
-    status: 'up-to-date' | 'available' | 'error' | null;
+    status: 'up-to-date' | 'available' | 'downloading' | 'downloaded' | 'error' | null;
     message?: string;
     latestVersion?: string;
   }>({ status: null });
 
   const currentAppVersion = '1.2.1';
 
+  // Listen to Electron Auto-Updater IPC events if available
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const electron = (window as any).electronAPI;
+    if (electron?.onUpdateStatus) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const unsubscribe = electron.onUpdateStatus((data: any) => {
+        if (data.status === 'checking') {
+          setCheckingUpdate(true);
+        } else if (data.status === 'available') {
+          setCheckingUpdate(false);
+          setUpdateResult({
+            status: 'available',
+            message: data.message || `Nueva versión ${data.version} encontrada. Descargando...`,
+            latestVersion: data.version
+          });
+        } else if (data.status === 'downloading') {
+          setCheckingUpdate(false);
+          setDownloadProgress(data.percent || 0);
+          setUpdateResult({
+            status: 'downloading',
+            message: `Descargando actualización: ${data.percent || 0}%`,
+            latestVersion: data.version
+          });
+        } else if (data.status === 'downloaded') {
+          setCheckingUpdate(false);
+          setDownloadProgress(100);
+          setUpdateResult({
+            status: 'downloaded',
+            message: `¡Versión ${data.version} descargada y lista para instalar!`,
+            latestVersion: data.version
+          });
+        } else if (data.status === 'not-available') {
+          setCheckingUpdate(false);
+          setUpdateResult({
+            status: 'up-to-date',
+            message: `Tienes instalada la versión más reciente (v${currentAppVersion}). No hay actualizaciones pendientes.`
+          });
+        } else if (data.status === 'error') {
+          setCheckingUpdate(false);
+          setUpdateResult({
+            status: 'error',
+            message: data.message || 'No se pudo conectar con el servidor de actualizaciones.'
+          });
+        }
+      });
+      return () => {
+        if (typeof unsubscribe === 'function') unsubscribe();
+      };
+    }
+  }, []);
+
   // Check GitHub for latest release or electron-updater
   const handleCheckUpdate = async () => {
     setCheckingUpdate(true);
     setUpdateResult({ status: null });
+    setDownloadProgress(null);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const electron = (window as any).electronAPI;
+    if (electron?.checkForUpdates) {
+      try {
+        const res = await electron.checkForUpdates();
+        if (res.status === 'error') {
+          setUpdateResult({
+            status: 'error',
+            message: res.message || 'Error al consultar actualizaciones en GitHub.'
+          });
+        }
+      } catch (err) {
+        console.log('Error triggering check for updates:', err);
+      } finally {
+        setTimeout(() => setCheckingUpdate(false), 1500);
+      }
+      return;
+    }
 
     try {
       const response = await fetch(
@@ -69,7 +142,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         setTimeout(() => {
           setUpdateResult({
             status: 'up-to-date',
-            message: `La versión actual v${currentAppVersion} está al día. Cuando esté disponible una nueva versión, se notificará automáticamente.`
+            message: `La versión actual v${currentAppVersion} está al día.`
           });
         }, 600);
       }
@@ -84,6 +157,14 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       setTimeout(() => {
         setCheckingUpdate(false);
       }, 700);
+    }
+  };
+
+  const handleRestartAndInstall = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const electron = (window as any).electronAPI;
+    if (electron?.restartAndInstall) {
+      electron.restartAndInstall();
     }
   };
 
@@ -274,23 +355,63 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         {/* Mensaje de resultado de actualización */}
         {updateResult.status && (
           <div
-            className={`p-3 rounded-lg border flex items-start gap-2 text-[11px] transition ${
-              updateResult.status === 'available'
+            className={`p-3 rounded-lg border flex flex-col gap-2 text-[11px] transition ${
+              updateResult.status === 'available' || updateResult.status === 'downloading'
                 ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200'
+                : updateResult.status === 'downloaded'
+                ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-400 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200'
+                : updateResult.status === 'error'
+                ? 'bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-800 text-red-900 dark:text-red-200'
                 : 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
             }`}
           >
-            {updateResult.status === 'available' ? (
-              <ArrowUpCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-            ) : (
-              <CheckCircle2 className="w-4 h-4 text-[#107c41] dark:text-emerald-400 shrink-0 mt-0.5" />
-            )}
-            <div className="space-y-0.5">
-              <div className="font-bold text-xs">
-                {updateResult.status === 'available' ? '¡Actualización Disponible!' : 'Aplicación al Día'}
+            <div className="flex items-start gap-2">
+              {updateResult.status === 'available' || updateResult.status === 'downloading' ? (
+                <ArrowUpCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              ) : updateResult.status === 'error' ? (
+                <X className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+              ) : (
+                <CheckCircle2 className="w-4 h-4 text-[#107c41] dark:text-emerald-400 shrink-0 mt-0.5" />
+              )}
+              <div className="space-y-0.5 flex-1">
+                <div className="font-bold text-xs">
+                  {updateResult.status === 'available'
+                    ? '¡Actualización Disponible!'
+                    : updateResult.status === 'downloading'
+                    ? 'Descargando Actualización...'
+                    : updateResult.status === 'downloaded'
+                    ? '¡Actualización Lista para Instalar!'
+                    : updateResult.status === 'error'
+                    ? 'Error en la Actualización'
+                    : 'Aplicación al Día'}
+                </div>
+                <div>{updateResult.message}</div>
               </div>
-              <div>{updateResult.message}</div>
             </div>
+
+            {/* Barra de progreso de descarga si está descargando */}
+            {downloadProgress !== null && downloadProgress >= 0 && downloadProgress < 100 && (
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden mt-1">
+                <div 
+                  className="bg-[#107c41] h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${downloadProgress}%` }}
+                />
+              </div>
+            )}
+
+            {/* Botón de reiniciar e instalar cuando termina la descarga */}
+            {updateResult.status === 'downloaded' && (
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={handleRestartAndInstall}
+                  className="bg-[#107c41] hover:bg-[#0d6334] text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Reiniciar y Aplicar Actualización Ahora</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
       </section>

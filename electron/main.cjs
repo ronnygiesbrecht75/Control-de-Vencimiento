@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell, Menu, dialog } = require('electron');
+const { app, BrowserWindow, shell, Menu, dialog, ipcMain } = require('electron');
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
 
@@ -7,42 +7,115 @@ let mainWindow = null;
 // Configure Auto-Updater
 autoUpdater.autoDownload = true;
 autoUpdater.autoInstallOnAppQuit = true;
+autoUpdater.allowPrerelease = false;
+autoUpdater.allowDowngrade = false;
+
+function sendToWindow(channel, data) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send(channel, data);
+  }
+}
 
 function setupAutoUpdater() {
-  if (!app.isPackaged) return; // Only check for updates in packaged (.exe) app
+  autoUpdater.on('checking-for-update', () => {
+    sendToWindow('updater-status', { status: 'checking', message: 'Buscando actualizaciones...' });
+  });
 
   autoUpdater.on('update-available', (info) => {
-    if (mainWindow) {
-      mainWindow.webContents.send('update-available', info.version);
-    }
+    sendToWindow('updater-status', {
+      status: 'available',
+      version: info.version,
+      message: `Nueva versión v${info.version} encontrada. Descargando en segundo plano...`
+    });
+  });
+
+  autoUpdater.on('update-not-available', (info) => {
+    sendToWindow('updater-status', {
+      status: 'not-available',
+      version: info?.version || app.getVersion(),
+      message: 'Tienes instalada la versión más reciente.'
+    });
+  });
+
+  autoUpdater.on('download-progress', (progressObj) => {
+    sendToWindow('updater-status', {
+      status: 'downloading',
+      percent: Math.round(progressObj.percent || 0),
+      transferred: progressObj.transferred,
+      total: progressObj.total,
+      message: `Descargando actualización: ${Math.round(progressObj.percent || 0)}%`
+    });
   });
 
   autoUpdater.on('update-downloaded', (info) => {
+    sendToWindow('updater-status', {
+      status: 'downloaded',
+      version: info.version,
+      message: `¡Versión v${info.version} descargada y lista para instalar!`
+    });
+
     dialog.showMessageBox(mainWindow || null, {
       type: 'info',
-      title: 'Actualización disponible',
-      message: `Se ha descargado la versión ${info.version} de la aplicación.`,
-      detail: '¿Deseas reiniciar la aplicación ahora para instalar la actualización?',
-      buttons: ['Reiniciar y Actualizar', 'Más tarde'],
+      title: 'Actualización lista para instalar',
+      message: `Se ha descargado la versión ${info.version} de Control de Facturas.`,
+      detail: '¿Deseas reiniciar la aplicación ahora para aplicar la actualización?',
+      buttons: ['Reiniciar y Actualizar ahora', 'Más tarde'],
       defaultId: 0,
       cancelId: 1
     }).then((result) => {
       if (result.response === 0) {
-        autoUpdater.quitAndInstall();
+        autoUpdater.quitAndInstall(false, true);
       }
     });
   });
 
   autoUpdater.on('error', (err) => {
-    console.log('Error en auto-updater:', err ? err.message : err);
+    const errorMsg = err ? (err.message || String(err)) : 'Error desconocido al buscar actualizaciones';
+    sendToWindow('updater-status', {
+      status: 'error',
+      message: errorMsg
+    });
+    console.error('Error en auto-updater:', errorMsg);
   });
 
-  // Check for updates shortly after launch
-  setTimeout(() => {
-    autoUpdater.checkForUpdatesAndNotify().catch((err) => {
-      console.log('No se pudo verificar actualizaciones:', err ? err.message : err);
-    });
-  }, 3000);
+  // IPC Handlers
+  ipcMain.handle('get-app-version', () => {
+    return app.getVersion();
+  });
+
+  ipcMain.handle('check-for-updates', async () => {
+    if (!app.isPackaged) {
+      return {
+        status: 'dev-mode',
+        message: 'Modo desarrollo (Vite): el auto-updater se activa en la aplicación empaquetada (.exe instalador).'
+      };
+    }
+    try {
+      const result = await autoUpdater.checkForUpdates();
+      return {
+        status: 'success',
+        updateInfo: result?.updateInfo
+      };
+    } catch (err) {
+      return {
+        status: 'error',
+        message: err ? (err.message || String(err)) : 'Error al consultar GitHub Releases.'
+      };
+    }
+  });
+
+  ipcMain.handle('restart-and-install', () => {
+    autoUpdater.quitAndInstall(false, true);
+  });
+
+  // Check for updates shortly after launch if packaged
+  if (app.isPackaged) {
+    setTimeout(() => {
+      autoUpdater.checkForUpdates().catch((err) => {
+        console.log('Verificación automática inicial:', err ? err.message : err);
+      });
+    }, 4000);
+  }
 }
 
 function createWindow() {
@@ -56,9 +129,10 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      sandbox: true,
+      sandbox: false,
+      preload: path.join(__dirname, 'preload.cjs')
     },
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#1e1f20',
   });
 
   // Remove default menu bar for clean native app look
