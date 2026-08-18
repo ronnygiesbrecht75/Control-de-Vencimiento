@@ -1,0 +1,6 @@
+{
+  "name": "Libro de Facturas Paraguay",
+  "description": "Sistema de registro simplificado de facturas y productos con exportación Excel, autocompletado y catálogo para Paraguay.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
