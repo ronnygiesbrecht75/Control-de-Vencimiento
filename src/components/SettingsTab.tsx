@@ -36,7 +36,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     latestVersion?: string;
   }>({ status: null });
 
-  const currentAppVersion = '1.2.0';
+  const currentAppVersion = '1.2.1';
 
   // Check GitHub for latest release or electron-updater
   const handleCheckUpdate = async () => {
