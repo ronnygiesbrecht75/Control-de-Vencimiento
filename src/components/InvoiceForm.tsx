@@ -314,9 +314,9 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-4">
+    <div className="max-w-[600px] mx-auto space-y-3.5">
       {/* Form Card */}
-      <div className="bg-white dark:bg-[#282a2c] p-4 sm:p-5 rounded-2xl border border-gray-200 dark:border-[#3c4043] shadow-xs transition-colors">
+      <div className="bg-white dark:bg-[#282a2c] p-3.5 sm:p-4 rounded-2xl border border-gray-200 dark:border-[#3c4043] shadow-xs transition-colors">
         
         {/* Header Title */}
         <div className="border-b border-gray-200 dark:border-[#3c4043] pb-3 mb-4">
