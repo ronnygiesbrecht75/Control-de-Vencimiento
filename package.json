@@ -20,9 +20,7 @@
     "productName": "Control de Facturas y Vencimiento",
     "publish": [
       {
-        "provider": "github",
-        "owner": "ronnygiesbrecht",
-        "repo": "control-facturas-vencimiento"
+        "provider": "github"
       }
     ],
     "directories": {

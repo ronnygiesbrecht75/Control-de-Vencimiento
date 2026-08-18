@@ -118,10 +118,17 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     }
 
     try {
-      const response = await fetch(
-        'https://api.github.com/repos/ronnygiesbrecht/control-facturas-vencimiento/releases/latest',
+      let response = await fetch(
+        'https://api.github.com/repos/ronnygiesbrecht/Control-de-Vencimiento/releases/latest',
         { headers: { Accept: 'application/vnd.github.v3+json' } }
       );
+
+      if (!response.ok) {
+        response = await fetch(
+          'https://api.github.com/repos/ronnygiesbrecht/control-facturas-vencimiento/releases/latest',
+          { headers: { Accept: 'application/vnd.github.v3+json' } }
+        );
+      }
 
       if (response.ok) {
         const data = await response.json();
