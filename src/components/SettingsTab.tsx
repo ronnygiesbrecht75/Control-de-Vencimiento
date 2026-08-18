@@ -37,7 +37,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     latestVersion?: string;
   }>({ status: null });
 
-  const currentAppVersion = '1.2.1';
+  const currentAppVersion = '1.2.2';
 
   // Listen to Electron Auto-Updater IPC events if available
   useEffect(() => {
