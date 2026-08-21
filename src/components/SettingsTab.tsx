@@ -38,7 +38,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     latestVersion?: string;
   }>({ status: null });
 
-  const currentAppVersion = '1.2.4';
+  const currentAppVersion = '1.2.5';
 
   // Listen to Electron Auto-Updater IPC events if available
   useEffect(() => {
@@ -119,13 +119,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
 
     try {
       let response = await fetch(
-        'https://api.github.com/repos/ronnygiesbrecht/Control-de-Vencimiento/releases/latest',
+        'https://api.github.com/repos/ronnygiesbrecht75/Control-de-Vencimiento/releases/latest',
         { headers: { Accept: 'application/vnd.github.v3+json' } }
       );
 
       if (!response.ok) {
         response = await fetch(
-          'https://api.github.com/repos/ronnygiesbrecht/control-facturas-vencimiento/releases/latest',
+          'https://api.github.com/repos/ronnygiesbrecht75/control-facturas-vencimiento/releases/latest',
           { headers: { Accept: 'application/vnd.github.v3+json' } }
         );
       }

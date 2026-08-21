@@ -1,7 +1,13 @@
 {
   "name": "control-facturas-vencimiento",
   "private": true,
-  "version": "1.2.4",
+  "version": "1.2.5",
+  "description": "Sistema de Control de Facturas y Vencimiento de Productos",
+  "author": "Ronny Giesbrecht",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ronnygiesbrecht75/Control-de-Vencimiento.git"
+  },
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
@@ -20,7 +26,9 @@
     "productName": "Control de Facturas y Vencimiento",
     "publish": [
       {
-        "provider": "github"
+        "provider": "github",
+        "owner": "ronnygiesbrecht75",
+        "repo": "Control-de-Vencimiento"
       }
     ],
     "directories": {
