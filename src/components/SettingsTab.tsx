@@ -10,7 +10,13 @@ import {
   Download, 
   Upload, 
   ShieldCheck,
-  X
+  X,
+  Sparkles,
+  Zap,
+  HardDrive,
+  DownloadCloud,
+  Layers,
+  ArrowRight
 } from 'lucide-react';
 import { ThemeMode, InvoiceItem, CatalogProduct } from '../types';
 
@@ -23,6 +29,14 @@ interface SettingsTabProps {
   onResetData: () => void;
 }
 
+interface DownloadMetrics {
+  percent: number;
+  speed?: string;
+  transferred?: string;
+  total?: string;
+  version?: string;
+}
+
 export const SettingsTab: React.FC<SettingsTabProps> = ({
   currentTheme,
   onThemeChange,
@@ -31,14 +45,14 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   onImportData
 }) => {
   const [checkingUpdate, setCheckingUpdate] = useState(false);
-  const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
+  const [downloadMetrics, setDownloadMetrics] = useState<DownloadMetrics | null>(null);
   const [updateResult, setUpdateResult] = useState<{
-    status: 'up-to-date' | 'available' | 'downloading' | 'downloaded' | 'error' | null;
+    status: 'checking' | 'up-to-date' | 'available' | 'downloading' | 'downloaded' | 'error' | null;
     message?: string;
     latestVersion?: string;
   }>({ status: null });
 
-  const currentAppVersion = '1.2.5';
+  const currentAppVersion = '1.2.6';
 
   // Listen to Electron Auto-Updater IPC events if available
   useEffect(() => {
@@ -49,31 +63,50 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       const unsubscribe = electron.onUpdateStatus((data: any) => {
         if (data.status === 'checking') {
           setCheckingUpdate(true);
+          setUpdateResult({
+            status: 'checking',
+            message: 'Buscando nuevas versiones en GitHub...'
+          });
         } else if (data.status === 'available') {
           setCheckingUpdate(false);
           setUpdateResult({
             status: 'available',
-            message: data.message || `Nueva versión ${data.version} encontrada. Descargando...`,
+            message: data.message || `Nueva versión v${data.version} encontrada. Descargando automáticamente...`,
             latestVersion: data.version
+          });
+          setDownloadMetrics({
+            percent: 0,
+            version: data.version
           });
         } else if (data.status === 'downloading') {
           setCheckingUpdate(false);
-          setDownloadProgress(data.percent || 0);
+          const percent = data.percent !== undefined ? Number(data.percent) : 0;
+          setDownloadMetrics({
+            percent: percent,
+            speed: data.speed,
+            transferred: data.transferred,
+            total: data.total,
+            version: data.version || updateResult.latestVersion
+          });
           setUpdateResult({
             status: 'downloading',
-            message: `Descargando actualización: ${data.percent || 0}%`,
-            latestVersion: data.version
+            message: `Descargando actualización en segundo plano: ${percent}%`,
+            latestVersion: data.version || updateResult.latestVersion
           });
         } else if (data.status === 'downloaded') {
           setCheckingUpdate(false);
-          setDownloadProgress(100);
+          setDownloadMetrics({
+            percent: 100,
+            version: data.version || updateResult.latestVersion
+          });
           setUpdateResult({
             status: 'downloaded',
-            message: `¡Versión ${data.version} descargada y lista para instalar!`,
+            message: `¡Versión v${data.version || currentAppVersion} descargada y lista para instalar!`,
             latestVersion: data.version
           });
         } else if (data.status === 'not-available') {
           setCheckingUpdate(false);
+          setDownloadMetrics(null);
           setUpdateResult({
             status: 'up-to-date',
             message: `Tienes instalada la versión más reciente (v${currentAppVersion}). No hay actualizaciones pendientes.`
@@ -82,7 +115,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           setCheckingUpdate(false);
           setUpdateResult({
             status: 'error',
-            message: data.message || 'No se pudo conectar con el servidor de actualizaciones.'
+            message: data.message || 'No se pudo conectar con el servidor de actualizaciones en GitHub.'
           });
         }
       });
@@ -90,13 +123,13 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         if (typeof unsubscribe === 'function') unsubscribe();
       };
     }
-  }, []);
+  }, [currentAppVersion, updateResult.latestVersion]);
 
   // Check GitHub for latest release or electron-updater
   const handleCheckUpdate = async () => {
     setCheckingUpdate(true);
-    setUpdateResult({ status: null });
-    setDownloadProgress(null);
+    setUpdateResult({ status: 'checking', message: 'Consultando versiones en GitHub...' });
+    setDownloadMetrics(null);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const electron = (window as any).electronAPI;
@@ -137,8 +170,12 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         if (tag && tag !== currentAppVersion && tag > currentAppVersion) {
           setUpdateResult({
             status: 'available',
-            message: `¡Hay una nueva versión disponible! (v${tag})`,
+            message: `¡Hay una nueva versión disponible! (v${tag}). En la versión instalada para PC se descargará automáticamente.`,
             latestVersion: tag
+          });
+          setDownloadMetrics({
+            percent: 100,
+            version: tag
           });
         } else {
           setUpdateResult({
@@ -154,7 +191,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           });
         }, 600);
       }
-    } catch (err) {
+    } catch {
       setTimeout(() => {
         setUpdateResult({
           status: 'up-to-date',
@@ -164,7 +201,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     } finally {
       setTimeout(() => {
         setCheckingUpdate(false);
-      }, 700);
+      }, 1000);
     }
   };
 
@@ -336,88 +373,197 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         </div>
 
         {/* Tarjeta de estado de actualización */}
-        <div className="p-3 sm:p-3.5 rounded-lg bg-gray-50 dark:bg-[#1e1f20] border border-gray-200 dark:border-[#3c4043] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="p-3.5 rounded-lg bg-gray-50 dark:bg-[#1e1f20] border border-gray-200 dark:border-[#3c4043] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="space-y-0.5">
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-[#107c41] animate-pulse"></div>
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-[#107c41] animate-pulse"></div>
               <h4 className="text-xs font-bold text-gray-900 dark:text-[#f1f3f4]">
                 Control de Facturas y Vencimiento de Productos
               </h4>
+              <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/40">
+                Auto-Updater Activo
+              </span>
             </div>
             <p className="text-[11px] text-gray-600 dark:text-[#bdc1c6]">
-              Sistema con soporte de actualización automática (*Auto-Updater*).
+              Canal de actualización directa desde GitHub Releases (<span className="font-mono text-gray-700 dark:text-gray-300">ronnygiesbrecht75/Control-de-Vencimiento</span>).
             </p>
           </div>
 
           <button
             id="btn-check-updates"
             onClick={handleCheckUpdate}
-            disabled={checkingUpdate}
-            className="w-full sm:w-auto bg-[#107c41] hover:bg-[#0d6334] text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition shadow-2xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={checkingUpdate || updateResult.status === 'downloading'}
+            className="w-full sm:w-auto bg-[#107c41] hover:bg-[#0d6334] text-white text-[11px] font-semibold px-3.5 py-2 rounded-lg flex items-center justify-center gap-1.5 transition shadow-2xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-emerald-200 ${checkingUpdate ? 'animate-spin' : ''}`} />
-            <span>{checkingUpdate ? 'Buscando...' : 'Buscar Actualizaciones'}</span>
+            <RefreshCw className={`w-3.5 h-3.5 text-emerald-100 ${checkingUpdate ? 'animate-spin' : ''}`} />
+            <span>{checkingUpdate ? 'Verificando...' : 'Buscar Actualizaciones'}</span>
           </button>
         </div>
 
-        {/* Mensaje de resultado de actualización */}
+        {/* Panel en Vivo: Descarga de Actualización y Estados */}
         {updateResult.status && (
           <div
-            className={`p-3 rounded-lg border flex flex-col gap-2 text-[11px] transition ${
-              updateResult.status === 'available' || updateResult.status === 'downloading'
-                ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200'
+            className={`p-3.5 rounded-xl border flex flex-col gap-3 text-[11px] transition-all shadow-xs ${
+              updateResult.status === 'downloading' || updateResult.status === 'available'
+                ? 'bg-amber-50/70 dark:bg-amber-950/25 border-amber-300 dark:border-amber-700/60 text-amber-950 dark:text-amber-100'
                 : updateResult.status === 'downloaded'
-                ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-400 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200'
+                ? 'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-400 dark:border-emerald-700 text-emerald-950 dark:text-emerald-100'
                 : updateResult.status === 'error'
-                ? 'bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-800 text-red-900 dark:text-red-200'
-                : 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
+                ? 'bg-red-50/70 dark:bg-red-950/25 border-red-300 dark:border-red-800 text-red-950 dark:text-red-100'
+                : updateResult.status === 'checking'
+                ? 'bg-blue-50/70 dark:bg-blue-950/25 border-blue-300 dark:border-blue-800 text-blue-950 dark:text-blue-100'
+                : 'bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
             }`}
           >
-            <div className="flex items-start gap-2">
-              {updateResult.status === 'available' || updateResult.status === 'downloading' ? (
-                <ArrowUpCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-              ) : updateResult.status === 'error' ? (
-                <X className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
-              ) : (
-                <CheckCircle2 className="w-4 h-4 text-[#107c41] dark:text-emerald-400 shrink-0 mt-0.5" />
-              )}
-              <div className="space-y-0.5 flex-1">
-                <div className="font-bold text-xs">
-                  {updateResult.status === 'available'
-                    ? '¡Actualización Disponible!'
-                    : updateResult.status === 'downloading'
-                    ? 'Descargando Actualización...'
-                    : updateResult.status === 'downloaded'
-                    ? '¡Actualización Lista para Instalar!'
-                    : updateResult.status === 'error'
-                    ? 'Error en la Actualización'
-                    : 'Aplicación al Día'}
+            {/* Cabecera del Estado */}
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-start gap-2.5">
+                {updateResult.status === 'downloading' ? (
+                  <div className="p-1.5 bg-amber-500 text-white rounded-lg animate-pulse shrink-0 mt-0.5">
+                    <DownloadCloud className="w-4 h-4" />
+                  </div>
+                ) : updateResult.status === 'available' ? (
+                  <div className="p-1.5 bg-amber-500 text-white rounded-lg shrink-0 mt-0.5">
+                    <ArrowUpCircle className="w-4 h-4" />
+                  </div>
+                ) : updateResult.status === 'downloaded' ? (
+                  <div className="p-1.5 bg-[#107c41] text-white rounded-lg shrink-0 mt-0.5 shadow-xs">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                ) : updateResult.status === 'checking' ? (
+                  <div className="p-1.5 bg-blue-600 text-white rounded-lg shrink-0 mt-0.5">
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  </div>
+                ) : updateResult.status === 'error' ? (
+                  <div className="p-1.5 bg-red-600 text-white rounded-lg shrink-0 mt-0.5">
+                    <X className="w-4 h-4" />
+                  </div>
+                ) : (
+                  <div className="p-1.5 bg-[#107c41] text-white rounded-lg shrink-0 mt-0.5">
+                    <CheckCircle2 className="w-4 h-4" />
+                  </div>
+                )}
+
+                <div className="space-y-0.5">
+                  <div className="font-bold text-xs flex items-center gap-2">
+                    <span>
+                      {updateResult.status === 'available'
+                        ? '¡Nueva Versión Encontrada!'
+                        : updateResult.status === 'downloading'
+                        ? 'Descargando Nueva Versión...'
+                        : updateResult.status === 'downloaded'
+                        ? '¡Actualización Descargada y Lista para Instalar!'
+                        : updateResult.status === 'checking'
+                        ? 'Verificando con GitHub...'
+                        : updateResult.status === 'error'
+                        ? 'Aviso de Actualización'
+                        : 'Sistema al Día'}
+                    </span>
+                    {updateResult.latestVersion && (
+                      <span className="font-mono text-[10px] bg-white/80 dark:bg-black/40 px-1.5 py-0.5 rounded border border-current/20 font-bold">
+                        v{updateResult.latestVersion}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] opacity-90 leading-relaxed">
+                    {updateResult.message}
+                  </p>
                 </div>
-                <div>{updateResult.message}</div>
               </div>
             </div>
 
-            {/* Barra de progreso de descarga si está descargando */}
-            {downloadProgress !== null && downloadProgress >= 0 && downloadProgress < 100 && (
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden mt-1">
-                <div 
-                  className="bg-[#107c41] h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${downloadProgress}%` }}
-                />
+            {/* SEGUIMIENTO EN VIVO DE LA DESCARGA (Barra, Porcentaje, MBs y Velocidad) */}
+            {(updateResult.status === 'downloading' || (downloadMetrics && downloadMetrics.percent > 0 && updateResult.status !== 'downloaded')) && (
+              <div className="bg-white/90 dark:bg-[#1e1f20]/90 rounded-lg p-3 border border-amber-200/80 dark:border-amber-800/40 space-y-2.5 mt-1">
+                {/* Cabecera del Progreso */}
+                <div className="flex items-center justify-between text-xs">
+                  <div className="font-semibold text-gray-800 dark:text-[#e3e3e3] flex items-center gap-1.5">
+                    <DownloadCloud className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                    <span>Progreso del instalador Windows</span>
+                  </div>
+                  <div className="font-mono font-bold text-amber-700 dark:text-amber-300 text-sm">
+                    {downloadMetrics ? `${downloadMetrics.percent}%` : '0%'}
+                  </div>
+                </div>
+
+                {/* Barra de progreso interactiva */}
+                <div className="w-full bg-gray-200 dark:bg-[#333538] rounded-full h-3 overflow-hidden p-0.5 relative shadow-inner">
+                  <div 
+                    className="bg-linear-to-r from-amber-500 via-[#107c41] to-emerald-500 h-full rounded-full transition-all duration-300 ease-out relative"
+                    style={{ width: `${downloadMetrics ? Math.max(4, downloadMetrics.percent) : 4}%` }}
+                  >
+                    <div className="absolute inset-0 bg-white/20 animate-pulse rounded-full" />
+                  </div>
+                </div>
+
+                {/* Tarjetas de Métricas de Transferencia */}
+                <div className="grid grid-cols-3 gap-2 pt-0.5">
+                  <div className="bg-gray-50 dark:bg-[#282a2c] p-2 rounded-md border border-gray-200/70 dark:border-[#3c4043]">
+                    <div className="text-[9px] text-gray-500 dark:text-[#9aa0a6] flex items-center gap-1 font-medium">
+                      <HardDrive className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                      <span>Transferido</span>
+                    </div>
+                    <div className="text-[11px] font-bold font-mono text-gray-900 dark:text-[#f1f3f4] mt-0.5">
+                      {downloadMetrics?.transferred && downloadMetrics?.total
+                        ? `${downloadMetrics.transferred} / ${downloadMetrics.total}`
+                        : `${downloadMetrics?.percent || 0}%`}
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-[#282a2c] p-2 rounded-md border border-gray-200/70 dark:border-[#3c4043]">
+                    <div className="text-[9px] text-gray-500 dark:text-[#9aa0a6] flex items-center gap-1 font-medium">
+                      <Zap className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                      <span>Velocidad</span>
+                    </div>
+                    <div className="text-[11px] font-bold font-mono text-gray-900 dark:text-[#f1f3f4] mt-0.5">
+                      {downloadMetrics?.speed || 'Descargando...'}
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-[#282a2c] p-2 rounded-md border border-gray-200/70 dark:border-[#3c4043]">
+                    <div className="text-[9px] text-gray-500 dark:text-[#9aa0a6] flex items-center gap-1 font-medium">
+                      <Layers className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                      <span>Destino</span>
+                    </div>
+                    <div className="text-[11px] font-bold font-mono text-gray-900 dark:text-[#f1f3f4] mt-0.5 truncate">
+                      {downloadMetrics?.version ? `v${downloadMetrics.version}` : `v${currentAppVersion}`}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-[10px] text-gray-500 dark:text-[#9aa0a6] flex items-center gap-1 italic">
+                  <span>💡 La descarga se realiza en segundo plano de forma segura. Puedes seguir registrando facturas con total normalidad.</span>
+                </div>
               </div>
             )}
 
-            {/* Botón de reiniciar e instalar cuando termina la descarga */}
+            {/* ACCIÓN CUANDO LA DESCARGA ESTÁ LISTA (v100% completada) */}
             {updateResult.status === 'downloaded' && (
-              <div className="pt-1">
-                <button
-                  type="button"
-                  onClick={handleRestartAndInstall}
-                  className="bg-[#107c41] hover:bg-[#0d6334] text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer shadow-xs"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Reiniciar y Aplicar Actualización Ahora</span>
-                </button>
+              <div className="bg-white/95 dark:bg-[#1e1f20]/95 p-3 rounded-lg border border-emerald-300 dark:border-emerald-800/60 space-y-2 mt-1">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-bold text-gray-900 dark:text-[#f1f3f4] flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-[#107c41] dark:text-emerald-400" />
+                    <span>Instalador descargado y verificado</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-[#107c41] dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/80 px-2 py-0.5 rounded-full">
+                    100% Completado
+                  </span>
+                </div>
+
+                <p className="text-[11px] text-gray-600 dark:text-[#bdc1c6]">
+                  La nueva versión se encuentra lista para aplicarse. Puedes reiniciar ahora para actualizar al instante, o continuar trabajando y se actualizará sola la próxima vez que inicies la app.
+                </p>
+
+                <div className="pt-1 flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleRestartAndInstall}
+                    className="bg-[#107c41] hover:bg-[#0d6334] text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-2 transition cursor-pointer shadow-sm active:scale-[0.99]"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Reiniciar y Aplicar Actualización Ahora</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>

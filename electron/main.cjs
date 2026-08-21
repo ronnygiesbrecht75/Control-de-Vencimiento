@@ -38,12 +38,22 @@ function setupAutoUpdater() {
   });
 
   autoUpdater.on('download-progress', (progressObj) => {
+    const percent = Math.min(100, Math.max(0, Math.round(progressObj.percent || 0)));
+    const speedMB = ((progressObj.bytesPerSecond || 0) / (1024 * 1024)).toFixed(2);
+    const transferredMB = ((progressObj.transferred || 0) / (1024 * 1024)).toFixed(1);
+    const totalMB = ((progressObj.total || 0) / (1024 * 1024)).toFixed(1);
+
     sendToWindow('updater-status', {
       status: 'downloading',
-      percent: Math.round(progressObj.percent || 0),
-      transferred: progressObj.transferred,
-      total: progressObj.total,
-      message: `Descargando actualización: ${Math.round(progressObj.percent || 0)}%`
+      percent: percent,
+      speed: `${speedMB} MB/s`,
+      transferred: `${transferredMB} MB`,
+      total: `${totalMB} MB`,
+      bytesPerSecond: progressObj.bytesPerSecond || 0,
+      transferredBytes: progressObj.transferred || 0,
+      totalBytes: progressObj.total || 0,
+      version: autoUpdater.currentVersion?.version || '',
+      message: `Descargando actualización: ${percent}% (${transferredMB} de ${totalMB} MB a ${speedMB} MB/s)`
     });
   });
 

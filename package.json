@@ -1,7 +1,7 @@
 {
   "name": "control-facturas-vencimiento",
   "private": true,
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "Sistema de Control de Facturas y Vencimiento de Productos",
   "author": "Ronny Giesbrecht",
   "repository": {
