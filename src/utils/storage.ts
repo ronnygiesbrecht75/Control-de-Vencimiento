@@ -61,9 +61,9 @@ const CATALOG_STORAGE_KEY = 'facturas_py_catalog_v1';
 export function loadStoredInvoices(): InvoiceItem[] {
   try {
     const raw = localStorage.getItem(INVOICES_STORAGE_KEY);
-    if (!raw) return INITIAL_INVOICES;
+    if (raw === null) return INITIAL_INVOICES;
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_INVOICES;
+    return Array.isArray(parsed) ? parsed : INITIAL_INVOICES;
   } catch {
     return INITIAL_INVOICES;
   }
@@ -80,9 +80,9 @@ export function saveStoredInvoices(invoices: InvoiceItem[]): void {
 export function loadStoredCatalog(): CatalogProduct[] {
   try {
     const raw = localStorage.getItem(CATALOG_STORAGE_KEY);
-    if (!raw) return INITIAL_CATALOG;
+    if (raw === null) return INITIAL_CATALOG;
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
+    if (Array.isArray(parsed)) {
       return parsed.map((item: CatalogProduct) => ({
         ...item,
         plazoValor: item.plazoValor !== undefined ? Number(item.plazoValor) : 6,

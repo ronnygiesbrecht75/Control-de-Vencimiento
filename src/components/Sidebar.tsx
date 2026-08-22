@@ -8,7 +8,8 @@ import {
   RotateCcw,
   Menu,
   X,
-  Settings
+  Settings,
+  Trash2
 } from 'lucide-react';
 import { ActiveTab } from '../types';
 
@@ -201,20 +202,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span>Descargar Excel (.xlsx)</span>
           </button>
 
-          {/* Botón Restablecer Datos */}
+          {/* Botón Vaciar Facturas */}
           <button
             id="sidebar-btn-reset"
             onClick={onResetData}
-            className="w-full bg-emerald-900/40 hover:bg-emerald-900/80 text-emerald-100 hover:text-white text-xs font-medium py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 border border-emerald-700/50 transition cursor-pointer"
-            title="Reiniciar datos de muestra"
+            className="w-full bg-emerald-950/50 hover:bg-red-950/60 text-emerald-100 hover:text-red-200 text-xs font-medium py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 border border-emerald-700/50 hover:border-red-500/50 transition cursor-pointer"
+            title="Eliminar todas las facturas registradas (mantiene el catálogo de productos)"
           >
-            <RotateCcw className="w-3.5 h-3.5 text-emerald-200" />
-            <span>Restablecer Datos</span>
+            <Trash2 className="w-3.5 h-3.5 text-emerald-300 hover:text-red-300" />
+            <span>Vaciar Facturas</span>
           </button>
 
           {/* Versión */}
           <div className="pt-1 text-center text-[11px] text-emerald-200/80 font-medium font-mono">
-            Control de Facturas &bull; v1.2
+            Control de Facturas &bull; v1.2.7
           </div>
         </div>
       </aside>

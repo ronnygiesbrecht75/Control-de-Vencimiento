@@ -26,7 +26,6 @@ interface SettingsTabProps {
   invoices: InvoiceItem[];
   catalog: CatalogProduct[];
   onImportData?: (invoices: InvoiceItem[], catalog: CatalogProduct[]) => void;
-  onResetData: () => void;
 }
 
 interface DownloadMetrics {
@@ -52,7 +51,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
     latestVersion?: string;
   }>({ status: null });
 
-  const currentAppVersion = '1.2.6';
+  const currentAppVersion = '1.2.7';
 
   // Listen to Electron Auto-Updater IPC events if available
   useEffect(() => {

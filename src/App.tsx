@@ -6,6 +6,7 @@ import { InvoiceForm } from './components/InvoiceForm';
 import { ProductCatalog } from './components/ProductCatalog';
 import { SettingsTab } from './components/SettingsTab';
 import { EditInvoiceModal } from './components/EditInvoiceModal';
+import { ConfirmClearInvoicesModal } from './components/ConfirmClearInvoicesModal';
 
 import { InvoiceItem, CatalogProduct, ActiveTab, PlazoUnidad, ThemeMode } from './types';
 import { 
@@ -27,6 +28,7 @@ export default function App() {
 
   // Modals
   const [editingInvoice, setEditingInvoice] = useState<InvoiceItem | null>(null);
+  const [isClearInvoicesModalOpen, setIsClearInvoicesModalOpen] = useState(false);
 
   // Theme Sync & System changes listener
   useEffect(() => {
@@ -157,12 +159,27 @@ export default function App() {
     }
   };
 
-  // Reset entire application data with demo records
-  const handleResetAllData = () => {
-    if (window.confirm('¿Desea reiniciar todos los registros con los datos de ejemplo iniciales?')) {
-      setInvoices(INITIAL_INVOICES);
-      setCatalog(INITIAL_CATALOG);
-    }
+  // Clear ALL registered invoices, keeping product catalog intact
+  const handleConfirmClearInvoices = () => {
+    setInvoices([]);
+    saveStoredInvoices([]);
+  };
+
+  // Export backup JSON helper
+  const handleExportBackup = () => {
+    const backupData = {
+      version: '1.2.7',
+      exportDate: new Date().toISOString(),
+      invoices,
+      catalog
+    };
+    const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `backup_facturas_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   // Import backup callback
@@ -193,7 +210,7 @@ export default function App() {
         invoiceCount={invoices.length}
         catalogCount={catalog.length}
         onExportExcel={handleExportExcel}
-        onResetData={handleResetAllData}
+        onResetData={() => setIsClearInvoicesModalOpen(true)}
       />
 
       {/* Main Content Area to the Right (Scrolls independently) */}
@@ -202,7 +219,6 @@ export default function App() {
         <div className="sticky top-0 z-20 shrink-0">
           <Header
             onExportExcel={handleExportExcel}
-            onResetData={handleResetAllData}
             activeTab={activeTab}
             invoiceCount={invoices.length}
           />
@@ -246,7 +262,6 @@ export default function App() {
               invoices={invoices}
               catalog={catalog}
               onImportData={handleImportBackupData}
-              onResetData={handleResetAllData}
             />
           )}
         </main>
@@ -269,6 +284,16 @@ export default function App() {
           onClose={() => setEditingInvoice(null)}
         />
       )}
+
+      {/* Clear Invoices Confirmation Modal */}
+      <ConfirmClearInvoicesModal
+        isOpen={isClearInvoicesModalOpen}
+        onClose={() => setIsClearInvoicesModalOpen(false)}
+        onConfirm={handleConfirmClearInvoices}
+        invoicesCount={invoices.length}
+        catalogCount={catalog.length}
+        onExportBackup={handleExportBackup}
+      />
 
     </div>
   );

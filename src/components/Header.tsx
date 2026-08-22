@@ -1,18 +1,13 @@
 import React from 'react';
-import { 
-  RotateCcw
-} from 'lucide-react';
 import { ActiveTab } from '../types';
 
 interface HeaderProps {
   onExportExcel?: () => void;
-  onResetData: () => void;
   activeTab: ActiveTab;
   invoiceCount: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  onResetData,
   activeTab,
   invoiceCount,
 }) => {
@@ -58,18 +53,7 @@ export const Header: React.FC<HeaderProps> = ({
           {info.subtitle}
         </p>
       </div>
-
-      {/* Quick Actions in Green Header */}
-      <div className="flex items-center gap-2.5">
-        <button
-          id="header-btn-reiniciar-datos"
-          onClick={onResetData}
-          className="bg-[#0d6334] hover:bg-[#084c26] text-emerald-100 hover:text-white p-1.5 rounded-lg text-xs transition cursor-pointer border border-emerald-600/40"
-          title="Reiniciar datos de muestra"
-        >
-          <RotateCcw className="w-3.5 h-3.5" />
-        </button>
-      </div>
     </header>
   );
 };
+
